@@ -57,13 +57,10 @@ def run_demo(cfg, ckpt, score_threshold, images_dir: pathlib.Path, output_dir: p
         boxes = boxes[indices]
         labels = labels[indices]
         scores = scores[indices]
-
         drawn_image = draw_boxes(
             image, boxes, labels, scores, class_names).astype(np.uint8)
         drawn_images.append(drawn_image)
         im = Image.fromarray(drawn_image)
-
-        im = Image.open(image_path).convert("RGB")
         output_path = output_dir.joinpath(f"{image_name}.png")
         im.save(output_path)
     return drawn_images

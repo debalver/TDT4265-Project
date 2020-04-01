@@ -46,7 +46,7 @@ class WaymoDataset(torch.utils.data.Dataset):
         return labels_processed
 
     def __getitem__(self, index):
-        labels, boxes = self.get_annotation(index)
+        boxes, labels = self.get_annotation(index)
         image = self._read_image(index)
         if self.transform:
             image, boxes, labels = self.transform(image, boxes, labels)
@@ -89,7 +89,7 @@ class WaymoDataset(torch.utils.data.Dataset):
             labels[idx] = bounding_box["label_id"]
         # SSD use label 0 as the background. Therefore +1
         labels = labels + 1
-        return labels, boxes
+        return boxes, labels
 
     def get_annotation(self, index):
         image_id = self.image_ids[index]
@@ -111,8 +111,11 @@ class WaymoDataset(torch.utils.data.Dataset):
         """
         keep_idx = []
         for idx in range(len(self)):
-            labels, boxes = self.get_annotation(idx)
+            boxes, labels = self.get_annotation(idx)
             if len(labels) == 0:
                 continue
             keep_idx.append(idx)
         return [self.image_ids[idx] for idx in keep_idx]
+
+    def get_img_info(self, index):
+        return {"height": 960, "width": 1280}

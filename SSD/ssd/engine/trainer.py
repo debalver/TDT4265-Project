@@ -63,6 +63,7 @@ def do_train(cfg, model,
             to_log = [
                 f"iter: {iteration:06d}",
                 f"lr: {lr:.5f}",
+                f'{meters}',
                 f"eta: {eta_string}",
             ]
             if torch.cuda.is_available():

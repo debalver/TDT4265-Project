@@ -6,6 +6,11 @@ Make sure to read through this tutorial before looking at other resources.
 * Labeling tips. From the staff's experience with the tool, here are a couple of tips: [https://piazza.com/class/k53ssppxkwb5yy?cid=185](https://piazza.com/class/k53ssppxkwb5yy?cid=185). 
 * Labeling specification. This specifies what should be labeled, how to place bounding boxes, etc.: 
     * We're following Waymo's specification: [https://github.com/waymo-research/waymo-open-dataset/blob/master/docs/labeling_specifications.md#2d-labeling-specifications](https://github.com/waymo-research/waymo-open-dataset/blob/master/docs/labeling_specifications.md#2d-labeling-specifications)
+    * **Sign Labeling Specification**:
+        - A sign bounding box is created if an object is a sign that is used to regulate traffic flow (the sign subtype is not specified). Examples include: stop signs, yield signs, speed limit signs, warning signs, guide and recreation signs.
+        - The following are not labeled: Street name signs, a paper sign / handwritten sign, business board, or any other signs that are not related to traffic.
+        - Only label front-facing signs.
+
 * OPENCV CVAT detailed tutorial: [https://github.com/opencv/cvat/blob/develop/cvat/apps/documentation/user_guide.md#interface-of-the-annotation-tool](https://github.com/opencv/cvat/blob/develop/cvat/apps/documentation/user_guide.md#interface-of-the-annotation-tool)
 
 

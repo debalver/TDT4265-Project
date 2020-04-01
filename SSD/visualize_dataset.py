@@ -18,7 +18,7 @@ indices = list(range(len(dataset)))
 np.random.shuffle(indices)
 for idx in indices:
     image = dataset._read_image(idx)
-    labels, boxes = dataset.get_annotation(idx)
+    boxes, labels = dataset.get_annotation(idx)
     image = draw_boxes(
         image, boxes, labels, class_name_map=dataset.class_names
     )

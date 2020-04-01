@@ -1,9 +1,9 @@
 import pathlib
-from ssd.data.datasets import VOCDataset, COCODataset, MNISTDetection
+from ssd.data.datasets import VOCDataset, COCODataset, MNISTDetection, TDT4265Dataset, WaymoDataset
 from .coco import coco_evaluation
 from .voc import voc_evaluation
 from .mnist import mnist_evaluation
-
+from .waymo import waymo_evaluation
 
 def evaluate(dataset, predictions, output_dir: pathlib.Path, **kwargs):
     """evaluate dataset using different methods based on dataset type.
@@ -24,5 +24,10 @@ def evaluate(dataset, predictions, output_dir: pathlib.Path, **kwargs):
         return coco_evaluation(**args)
     elif isinstance(dataset, MNISTDetection):
         return mnist_evaluation(**args)
+    elif isinstance(dataset, WaymoDataset):
+        return waymo_evaluation(**args)
+    elif isinstance(dataset, TDT4265Dataset):
+        return waymo_evaluation(**args)
+
     else:
         raise NotImplementedError

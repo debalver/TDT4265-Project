@@ -35,8 +35,10 @@ DATASETS:
 
 #### Dataset Information
 - We've created dataset splits; train and validation. The validation is 20% of the entire dataset. This can be changed in [waymo.py](../ssd/data/datasets/waymo.py)
-- Consists of 4 classes: vehicle, person, sign and cyclist
+- Consists of three classes: vehicle, person and cyclist. 
 - Each image has a resolution of 1280 x 960 
+- Something to note is that we've set number of classes to 4+1 (even though it should be 3+1) in the waymo config file. This is such that we can keep the same output layers for the Waymo dataset as the TDT4265 dataset. This will cause the **"sign" mAP to show nan** in the evaluation process, but that should be fine.
+
 
 ---
 
