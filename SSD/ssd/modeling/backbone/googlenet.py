@@ -207,15 +207,15 @@ class GoogLeNet(nn.Module):
     def forward(self, x):
         # type: (Tensor) -> GoogLeNetOutputs
         x = self._transform_input(x)
-        x, aux1, aux2 = self._forward(x)
-        aux_defined = self.training and self.aux_logits
-        if torch.jit.is_scripting():
-            if not aux_defined:
-                warnings.warn("Scripted GoogleNet always returns GoogleNetOutputs Tuple")
-            return GoogLeNetOutputs(x, aux2, aux1)
-        else:
-            return self.eager_outputs(x, aux2, aux1)
-
+        features = self._forward(x)
+        # aux_defined = self.training and self.aux_logits
+        # if torch.jit.is_scripting():
+        #     if not aux_defined:
+        #         warnings.warn("Scripted GoogleNet always returns GoogleNetOutputs Tuple")
+        #     return GoogLeNetOutputs(x, aux2, aux1)
+        # else:
+        #     return self.eager_outputs(x, aux2, aux1)
+        return features
 
 class Inception(nn.Module):
 
