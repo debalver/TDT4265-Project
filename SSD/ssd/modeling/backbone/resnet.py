@@ -204,10 +204,10 @@ class ResNet(nn.Module):
         features = []
         x = self.conv1(x)
         x = self.bn1(x)
-        features.append(x)
 
         x = self.relu(x)
         x = self.maxpool(x)
+        features.append(x)
 
         x = self.layer1(x)
         features.append(x)
