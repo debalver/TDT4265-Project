@@ -144,8 +144,8 @@ class GoogLeNet(nn.Module):
         x = self.conv2(x)
         # N x 64 x 56 x 56
         x = self.conv3(x)
-        features.append(x)
         # N x 192 x 56 x 56
+        features.append(x)
         x = self.maxpool2(x)
 
         # N x 192 x 28 x 28
@@ -158,10 +158,10 @@ class GoogLeNet(nn.Module):
         # N x 480 x 14 x 14
         x = self.inception4a(x)
         # N x 512 x 14 x 14
-        aux1 = torch.jit.annotate(Optional[Tensor], None)
-        if self.aux1 is not None:
-            if self.training:
-                aux1 = self.aux1(x)
+        # aux1 = torch.jit.annotate(Optional[Tensor], None)
+        # if self.aux1 is not None:
+        #     if self.training:
+        #         aux1 = self.aux1(x)
 
         x = self.inception4b(x)
         # N x 512 x 14 x 14
@@ -169,10 +169,10 @@ class GoogLeNet(nn.Module):
         # N x 512 x 14 x 14
         x = self.inception4d(x)
         # N x 528 x 14 x 14
-        aux2 = torch.jit.annotate(Optional[Tensor], None)
-        if self.aux2 is not None:
-            if self.training:
-                aux2 = self.aux2(x)
+        # aux2 = torch.jit.annotate(Optional[Tensor], None)
+        # if self.aux2 is not None:
+        #     if self.training:
+        #         aux2 = self.aux2(x)
 
         x = self.inception4e(x)
         # N x 832 x 14 x 14
