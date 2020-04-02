@@ -4,7 +4,7 @@ from ssd.modeling.backbone.basic import BasicModel
 from ssd.modeling.box_head.box_head import SSDBoxHead
 from ssd.utils.model_zoo import load_state_dict_from_url
 from ssd import torch_utils
-import ssd.modelin.backbone.googlenet
+from ssd.modeling.backbone.googlenet import googlenet
 
 class SSDDetector(nn.Module):
     def __init__(self, cfg):
@@ -44,3 +44,4 @@ def build_backbone(cfg):
         return model
     if backbone_name == "googlenet":
         model = googlenet(cfg.MODEL.BACKBONE.PRETRAINED)
+        return model

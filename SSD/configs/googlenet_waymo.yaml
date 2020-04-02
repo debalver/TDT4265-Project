@@ -3,7 +3,7 @@ MODEL:
     BACKBONE:
         NAME: 'googlenet'
         PRETRAINED: False
-        OUT_CHANNELS: [64, 480, 832, 1024, 1024]
+        OUT_CHANNELS: [192, 480, 832, 1024, 1024]
         INPUT_CHANNELS: 3
 INPUT:
     IMAGE_SIZE: 300

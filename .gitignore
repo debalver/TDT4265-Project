@@ -129,4 +129,5 @@ dmypy.json
 .pyre/
 
 # don't push datasets
-ssd/datasets/
+SSD/datasets/
+SSD/outputs/
