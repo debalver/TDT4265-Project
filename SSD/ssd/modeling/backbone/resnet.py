@@ -207,7 +207,6 @@ class ResNet(nn.Module):
 
         x = self.relu(x)
         x = self.maxpool(x)
-        features.append(x)
 
         x = self.layer1(x)
         features.append(x)
@@ -218,7 +217,8 @@ class ResNet(nn.Module):
         x = self.layer4(x)
         features.append(x)
 
-        # x = self.avgpool(x)
+        x = self.avgpool(x)
+        features.append(x)
         # x = torch.flatten(x, 1)
         # x = self.fc(x)
 
