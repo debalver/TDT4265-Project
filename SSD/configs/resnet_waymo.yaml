@@ -2,12 +2,12 @@ MODEL:
     NUM_CLASSES: 5
     BACKBONE:
         NAME: 'resnet'
-        PRETRAINED: False
+        PRETRAINED: True
         #TODO: check whether output fetures are correct for resnet 34
         OUT_CHANNELS: [64, 64, 128, 256, 512]
         INPUT_CHANNELS: 3
     PRIORS:
-        FEATURE_MAPS: [75, 37, 18, 9, 1]
+        FEATURE_MAPS: [75, 75, 38, 19, 10]
 INPUT:
     IMAGE_SIZE: 300
 DATASETS:
@@ -19,5 +19,5 @@ SOLVER:
     GAMMA: 0.1
     BATCH_SIZE: 16
     LR: 1e-3
-OUTPUT_DIR: 'outputs/googlenet'
+OUTPUT_DIR: 'outputs/resnet'
 DATASET_DIR: "datasets"
