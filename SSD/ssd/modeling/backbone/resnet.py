@@ -223,8 +223,8 @@ class ResNet(nn.Module):
         # x = self.fc(x)
 
         # print shape of outputs
-        for feature in features:
-            print(feature.shape[1:])
+        # for feature in features:
+        #    print(feature.shape[1:])
 
         return features
 
