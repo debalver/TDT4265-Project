@@ -1,0 +1,29 @@
+MODEL:
+    NUM_CLASSES: 5
+    BACKBONE:
+        NAME: 'MobileNetV2'
+        PRETRAINED: True
+        #OUT_CHANNELS: [32, 16, 24, 24, 32, 32, 32, 64, 64, 64, 64, 96, 96, 96, 160, 160, 160 320, 1280]
+        OUT_CHANNELS: [64, 64, 96, 160, 320, 1280]
+        # LAYERS INDEXES FOR OUT_CHANNELS AND FEATURE_MAPS: 7 10 13 15 17 18 (others indixes can be taken as well!)
+        INPUT_CHANNELS: 3
+    PRIORS:
+        FEATURE_MAPS: [19, 19, 19, 10, 10, 10]
+        #FEATURE_MAPS: [150, 150, 75, 75, 38, 38, 38, 19, 19, 19, 19, 19, 19 19, 10, 10, 10, 10, 10]
+        #STRIDES: [2, 2, 4, 4, 8, 8, 8, 16, 16, 16, 16, 16, 16, 16, 30, 30, 30, 30, 30]
+        #MIN_SIZES: [30, 60, 111, 162, 213, 264, 315, 366, 417, 468, 519, 570, 621, 672, 723, 774, 825, 876, 927]
+        #MAX_SIZES: [60, 111, 162, 213, 264, 315, 366, 417, 468, 519, 570, 621, 672, 723, 774, 825, 876, 927, 978]
+        #ASPECT_RATIOS: [[2], [2, 3], [2, 3], [2, 3], [2], [2], [2], [2], [2, 3], [2, 3], [2], [2], [2, 3], [2, 3], [2, 3], [2, 3], [2], [2], [2]]
+INPUT:
+    IMAGE_SIZE: 300
+DATASETS:
+    TRAIN: ("waymo_train",)
+    TEST: ("waymo_val", )
+SOLVER:
+    MAX_ITER: 50000
+    LR_STEPS: [80000, 100000]
+    GAMMA: 0.1
+    BATCH_SIZE: 16
+    LR: 1e-3
+OUTPUT_DIR: 'outputs/mobilenet' # Be aware that there are already some results here, so it will take the checkpoint
+DATASET_DIR: "datasets"

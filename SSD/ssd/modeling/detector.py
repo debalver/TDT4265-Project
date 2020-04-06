@@ -4,7 +4,7 @@ from ssd.modeling.backbone.basic import BasicModel
 from ssd.modeling.box_head.box_head import SSDBoxHead
 from ssd.utils.model_zoo import load_state_dict_from_url
 from ssd import torch_utils
-from ssd. modeling.backbone.resnet import resnet101, resnet152, resnet18, resnet34, resnet50
+from ssd.modeling.backbone.mobilenet import MobileNetV2, mobilenet_v2
 
 class SSDDetector(nn.Module):
     def __init__(self, cfg):
@@ -42,6 +42,6 @@ def build_backbone(cfg):
                 "https://s3.amazonaws.com/amdegroot-models/vgg16_reducedfc.pth")
             model.init_from_pretrain(state_dict)
         return model
-    if backbone_name == "resnet":
-        model = resnet34(cfg.MODEL.BACKBONE.PRETRAINED)
+    if backbone_name == "MobileNetV2":
+        model = mobilenet_v2(cfg.MODEL.BACKBONE.PRETRAINED, cfg.MODEL.NUM_CLASSES)
         return model
