@@ -113,7 +113,8 @@ class ToPercentCoords(object):
 
 class Resize(object):
     def __init__(self, width=300, height=300):
-        self.size = size
+        self.width = width
+        self.height = height
 
     def __call__(self, image, boxes=None, labels=None):
         image = cv2.resize(image, (self.width,
