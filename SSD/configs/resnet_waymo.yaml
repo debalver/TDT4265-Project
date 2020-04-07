@@ -4,10 +4,10 @@ MODEL:
         NAME: 'resnet'
         PRETRAINED: True
         #TODO: check whether output fetures are correct for resnet 34
-        OUT_CHANNELS: [128, 256, 512, 512]
+        OUT_CHANNELS: [256, 512, 512, 256, 256, 256]
         INPUT_CHANNELS: 3
     PRIORS:
-        FEATURE_MAPS: [38, 19, 10, 1]
+        FEATURE_MAPS: [38, 19, 19, 10, 1, 1]
 INPUT:
     IMAGE_SIZE: 300
 DATASETS:
