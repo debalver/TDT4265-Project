@@ -63,7 +63,7 @@ def googlenet(pretrained=False, progress=True, **kwargs):
 class GoogLeNet(nn.Module):
     __constants__ = ['aux_logits', 'transform_input']
 
-    def __init__(self, num_classes=5, aux_logits=True, transform_input=False, init_weights=True,
+    def __init__(self, num_classes=1000, aux_logits=False, transform_input=False, init_weights=True,
                  blocks=None):
         super(GoogLeNet, self).__init__()
         if blocks is None:
