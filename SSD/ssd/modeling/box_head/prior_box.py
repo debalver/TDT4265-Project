@@ -28,25 +28,25 @@ class PriorBox:
             scale_height = self.image_size[1] / self.strides[k][1]
             for i, j in product(range(f[0]), range(f[1])):
                 # unit center x,y
-                cx = (j + 0.5) / scale_width
-                cy = (i + 0.5) / scale_height
+                cx = (i + 0.5) / scale_width
+                cy = (j + 0.5) / scale_height
 
                 # small sized square box
                 size = self.min_sizes[k]
-                w = size / self.image_size[0]
-                h = size / self.image_size[1]
+                h = w = size / self.image_size[0]
+                # h = size / self.image_size[1]
                 priors.append([cx, cy, w, h])
 
                 # big sized square box
                 size = sqrt(self.min_sizes[k] * self.max_sizes[k])
-                w = size / self.image_size[0]
-                h = size / self.image_size[1]
+                h = w = size / self.image_size[0]
+                # h = size / self.image_size[1]
                 priors.append([cx, cy, w, h])
 
                 # change h/w ratio of the small sized box
                 size = self.min_sizes[k]
-                w = size / self.image_size[0]
-                h = size / self.image_size[1]
+                h = w = size / self.image_size[0]
+                # h = size / self.image_size[1]
                 for ratio in self.aspect_ratios[k]:
                     ratio = sqrt(ratio)
                     priors.append([cx, cy, w * ratio, h / ratio])
