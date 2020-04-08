@@ -145,49 +145,52 @@ class GoogLeNet(nn.Module):
         # N x 64 x 56 x 56
         x = self.conv3(x)
         # N x 192 x 56 x 56
-        features.append(x)
         x = self.maxpool2(x)
 
         # N x 192 x 28 x 28
         x = self.inception3a(x)
         # N x 256 x 28 x 28
         x = self.inception3b(x)
-        # N x 480 x 28 x 28
         features.append(x)
+        # N x 480 x 28 x 28
         x = self.maxpool3(x)
         # N x 480 x 14 x 14
         x = self.inception4a(x)
-        # N x 512 x 14 x 14
+
         # aux1 = torch.jit.annotate(Optional[Tensor], None)
         # if self.aux1 is not None:
         #     if self.training:
         #         aux1 = self.aux1(x)
 
+        # N x 512 x 14 x 14
         x = self.inception4b(x)
         # N x 512 x 14 x 14
         x = self.inception4c(x)
+        features.append(x)
         # N x 512 x 14 x 14
         x = self.inception4d(x)
-        # N x 528 x 14 x 14
+
         # aux2 = torch.jit.annotate(Optional[Tensor], None)
         # if self.aux2 is not None:
         #     if self.training:
         #         aux2 = self.aux2(x)
 
+        # N x 528 x 14 x 14
         x = self.inception4e(x)
-        # N x 832 x 14 x 14
         features.append(x)
+        # N x 832 x 14 x 14
         x = self.maxpool4(x)
         # N x 832 x 7 x 7
         x = self.inception5a(x)
         # N x 832 x 7 x 7
         x = self.inception5b(x)
-        # N x 1024 x 7 x 7
-        features.append(x)
 
+        features.append(x)
+        # N x 1024 x 7 x 7
         x = self.avgpool(x)
         # N x 1024 x 1 x 1
         features.append(x)
+
         # x = torch.flatten(x, 1)
         # # N x 1024
         # x = self.dropout(x)
