@@ -1,5 +1,6 @@
 from torch import nn
 from ssd.modeling.backbone.vgg import VGG
+from ssd.modeling.backbone.inception import inception_v3
 from ssd.modeling.backbone.basic import BasicModel
 from ssd.modeling.box_head.box_head import SSDBoxHead
 from ssd.utils.model_zoo import load_state_dict_from_url
@@ -40,4 +41,7 @@ def build_backbone(cfg):
             state_dict = load_state_dict_from_url(
                 "https://s3.amazonaws.com/amdegroot-models/vgg16_reducedfc.pth")
             model.init_from_pretrain(state_dict)
+        return model
+    if backbone_name == "inception":
+        model = inception_v3(cfg.MODEL.BACKBONE.PRETRAINED)
         return model
