@@ -6,7 +6,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.jit.annotations import Optional
 from torch import Tensor
-from .utils import load_state_dict_from_url
+from torchvision.models.utils import load_state_dict_from_url
 
 
 __all__ = ['Inception3', 'inception_v3', 'InceptionOutputs', '_InceptionOutputs']
@@ -177,11 +177,15 @@ class Inception3(nn.Module):
         x = self.Mixed_7c(x)
         # N x 2048 x 8 x 8
         # Sixth feature, after inception block E, 2048 channels, 8x8 size
+        features.append(x)
         # Adaptive average pooling
         x = F.adaptive_avg_pool2d(x, (1, 1))
         # N x 2048 x 1 x 1
         # Seventh feature, after average pooling, 2048 channels, 1x1 size
+        features.append(x)
+        
         # Classifier from inception is not used for our project, see in box_head.py for the classifier
+        
         #x = F.dropout(x, training=self.training)
         # N x 2048 x 1 x 1
         #x = torch.flatten(x, 1)
@@ -189,8 +193,6 @@ class Inception3(nn.Module):
         #x = self.fc(x)
         # N x 1000 (num_classes)
         #return x, aux
-        for layer in features:
-            print(layer.shape)
         return features
 
     @torch.jit.unused
@@ -202,16 +204,18 @@ class Inception3(nn.Module):
             return x
 
     def forward(self, x):
+        # As we don't use the auxiliary outputs so far, we comment everything related to auxiliary 
         x = self._transform_input(x)
-        x, aux = self._forward(x)
-        aux_defined = self.training and self.aux_logits
-        if torch.jit.is_scripting():
-            if not aux_defined:
-                warnings.warn("Scripted Inception3 always returns Inception3 Tuple")
-            return InceptionOutputs(x, aux)
-        else:
-            return self.eager_outputs(x, aux)
-
+        #x, aux = self._forward(x)
+        x = self._forward(x)
+        #aux_defined = self.training and self.aux_logits
+        #if torch.jit.is_scripting():
+        #    if not aux_defined:
+        #        warnings.warn("Scripted Inception3 always returns Inception3 Tuple")
+        #    return InceptionOutputs(x, aux)
+        #else:
+        #    return self.eager_outputs(x, aux)
+        return x
 
 class InceptionA(nn.Module):
 

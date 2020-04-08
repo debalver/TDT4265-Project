@@ -3,10 +3,15 @@ MODEL:
     BACKBONE:
         NAME: 'inception'
         PRETRAINED: True
-        OUT_CHANNELS: [480, 512, 832, 1024, 1024] # TODO adapt this
+        OUT_CHANNELS: [192, 288, 768, 768, 1280, 2048, 2048] # TODO adapt this
         INPUT_CHANNELS: 3
     PRIORS:
-        FEATURE_MAPS: [37, 18, 18, 9, 1] # TODO adapt this as well
+        FEATURE_MAPS: [35, 35, 17, 17, 8, 8, 1] # TODO adapt this as well
+        STRIDES: [8, 8, 17, 17, 37, 37, 299] # TODO adapt 
+        MIN_SIZES: [30, 60, 111, 162, 213, 264, 315]
+        MAX_SIZES: [60, 111, 162, 213, 264, 315, 366]
+        ASPECT_RATIOS : [[2], [2, 3], [2, 3], [2, 3], [2], [2], [2]]
+        BOXES_PER_LOCATION: [4, 6, 6, 6, 4, 4, 4]
 INPUT:
     IMAGE_SIZE: 299
 DATASETS:
