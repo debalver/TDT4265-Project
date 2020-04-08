@@ -21,6 +21,44 @@ model_urls = {
     'wide_resnet101_2': 'https://download.pytorch.org/models/wide_resnet101_2-32ee1156.pth',
 }
 
+class ConvBnReluLayer(nn.Module):
+    
+    def __init__(self, inplanes, planes, kernel_size, padding, stride, bias=False):
+        super(ConvBnReluLayer, self).__init__()
+        self.conv = nn.Conv2d(inplanes, planes, kernel_size=kernel_size, padding=padding, 
+                               stride=stride, bias=bias)
+        self.bn = nn.BatchNorm2d(planes)
+        self.relu = nn.ReLU(inplace=True)
+        
+    def forward(self, x):
+        out = self.conv(x)
+        out = self.bn(out)
+        out = self.relu(out)
+        return out
+
+
+class ExtraLayers(nn.Module):
+    
+    def __init__(self, inplanes):
+        super(ExtraLayers, self).__init__()
+        self.convbnrelu1_1 = ConvBnReluLayer(inplanes, 256, kernel_size=1, padding=0, stride=1)
+        self.convbnrelu1_2 = ConvBnReluLayer(256, 512, kernel_size=3, padding=1, stride=2)
+        self.convbnrelu2_1 = ConvBnReluLayer(512, 256, kernel_size=1, padding=0, stride=1)
+        self.convbnrelu2_2 = ConvBnReluLayer(256, 512, kernel_size=3, padding=1, stride=2) 
+        self.convbnrelu3_1 = ConvBnReluLayer(512, 256, kernel_size=1, padding=0, stride=1)
+        self.convbnrelu3_2 = ConvBnReluLayer(256, 512, kernel_size=3, padding=1, stride=2)
+        self.avgpool = nn.AvgPool2d(3, stride=1)
+        
+    def forward(self, x):
+        out1_1 = self.convbnrelu1_1(x)
+        out1_2 = self.convbnrelu1_2(out1_1)
+        out2_1 = self.convbnrelu2_1(out1_2)
+        out2_2 = self.convbnrelu2_2(out2_1)
+        out3_1 = self.convbnrelu3_1(out2_2)
+        out3_2 = self.convbnrelu3_2(out3_1)
+        out = self.avgpool(out3_1)
+        return out1_2, out2_2, out3_2, out
+
 
 def conv3x3(in_planes, out_planes, stride=1, groups=1, dilation=1):
     """3x3 convolution with padding"""
@@ -158,6 +196,8 @@ class ResNet(nn.Module):
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
         self.fc = nn.Linear(512 * block.expansion, num_classes)
 
+        
+
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
                 nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
@@ -209,16 +249,13 @@ class ResNet(nn.Module):
         x = self.maxpool(x)
 
         x = self.layer1(x)
-        features.append(x)
         x = self.layer2(x)
         features.append(x)
         x = self.layer3(x)
-        features.append(x)
         x = self.layer4(x)
         features.append(x)
 
-        x = self.avgpool(x)
-        features.append(x)
+        # x = self.avgpool(x)
         # x = torch.flatten(x, 1)
         # x = self.fc(x)
 
@@ -230,6 +267,18 @@ class ResNet(nn.Module):
 
     def forward(self, x):
         return self._forward_impl(x)
+
+
+class ExtendedResNet(nn.Module):
+    def __init__(self, resnet):
+        super(ExtendedResNet, self).__init__()
+        self.resnet = resnet
+        self.extra_layers = ExtraLayers(resnet.inplanes)
+
+    def forward(self, x):
+        features = self.resnet(x)
+        features.extend(self.extra_layers(features[-1]))
+        return features
 
 
 def _resnet(arch, block, layers, pretrained, progress, **kwargs):

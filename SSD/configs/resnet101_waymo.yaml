@@ -1,20 +1,19 @@
 MODEL:
     NUM_CLASSES: 5
     BACKBONE:
-        NAME: 'resnet'
+        NAME: 'resnet101'
         PRETRAINED: True
-        #TODO: check whether output fetures are correct for resnet 34
-        OUT_CHANNELS: [64, 128, 256, 512, 512]
+        OUT_CHANNELS: [512, 2048, 512, 512, 512, 256]
         INPUT_CHANNELS: 3
     PRIORS:
-        FEATURE_MAPS: [75, 38, 19, 10, 1]
+        FEATURE_MAPS: [38, 10, 5, 3, 2, 1]
 INPUT:
     IMAGE_SIZE: 300
 DATASETS:
     TRAIN: ("waymo_train",)
     TEST: ("waymo_val", )
 DATA_LOADER:
-  NUM_WORKERS: 8
+  NUM_WORKERS: 4
 SOLVER:
     MAX_ITER: 120000
     LR_STEPS: [80000, 100000]
@@ -23,5 +22,5 @@ SOLVER:
     LR: 1e-3
 EVAL_STEP: 2500
 MODEL_SAVE_STEP: 2500
-OUTPUT_DIR: 'outputs/resnet'
+OUTPUT_DIR: 'outputs/resnet101'
 DATASET_DIR: "datasets"
