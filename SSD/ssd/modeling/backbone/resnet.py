@@ -238,32 +238,33 @@ class ResNet(nn.Module):
         return self._forward_impl(x)
 
 
-def _resnet(arch, block, layers, pretrained, progress, **kwargs):
+def _resnet(arch, block, layers, pretrained, transfer_learning, progress, **kwargs):
     model = ResNet(block, layers, **kwargs)
     if pretrained:
         state_dict = load_state_dict_from_url(model_urls[arch],
                                               progress=progress)
         # Transfer learning ! 
-        for param in model.conv1.parameters(): 
-            param.requires_grad = False
-        for param in model.bn1.parameters(): 
-            param.requires_grad = False
-        for param in model.relu.parameters(): 
-            param.requires_grad = False
-        for param in model.maxpool.parameters(): 
-            param.requires_grad = False
-        for param in model.layer1.parameters(): 
-            param.requires_grad = False
-        for param in model.layer2.parameters(): 
-            param.requires_grad = False
-        for param in model.layer3.parameters(): 
-            param.requires_grad = False
-        for param in model.layer4.parameters(): 
-            param.requires_grad = True
-        for param in model.avgpool.parameters(): 
-            param.requires_grad = True
-        for param in model.fc.parameters(): 
-            param.requires_grad = False
+        if transfer_learning:
+            for param in model.conv1.parameters(): 
+                param.requires_grad = False
+            for param in model.bn1.parameters(): 
+                param.requires_grad = False
+            for param in model.relu.parameters(): 
+                param.requires_grad = False
+            for param in model.maxpool.parameters(): 
+                param.requires_grad = False
+            for param in model.layer1.parameters(): 
+                param.requires_grad = False
+            for param in model.layer2.parameters(): 
+                param.requires_grad = False
+            for param in model.layer3.parameters(): 
+                param.requires_grad = False
+            for param in model.layer4.parameters(): 
+                param.requires_grad = True
+            for param in model.avgpool.parameters(): 
+                param.requires_grad = True
+            for param in model.fc.parameters(): 
+                param.requires_grad = False
         
         model.load_state_dict(state_dict)
     return model
@@ -324,7 +325,7 @@ def resnet152(pretrained=False, progress=True, **kwargs):
                    **kwargs)
 
 
-def resnext50_32x4d(pretrained=False, progress=True, **kwargs):
+def resnext50_32x4d(pretrained=False, transfer_learning=False ,progress=True, **kwargs):
     r"""ResNeXt-50 32x4d model from
     `"Aggregated Residual Transformation for Deep Neural Networks" <https://arxiv.org/pdf/1611.05431.pdf>`_
     Args:
@@ -334,7 +335,7 @@ def resnext50_32x4d(pretrained=False, progress=True, **kwargs):
     kwargs['groups'] = 32
     kwargs['width_per_group'] = 4
     return _resnet('resnext50_32x4d', Bottleneck, [3, 4, 6, 3],
-                   pretrained, progress, **kwargs)
+                   pretrained, transfer_learning, progress, **kwargs)
 
 
 def resnext101_32x8d(pretrained=False, progress=True, **kwargs):

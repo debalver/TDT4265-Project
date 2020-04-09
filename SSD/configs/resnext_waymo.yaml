@@ -3,6 +3,7 @@ MODEL:
     BACKBONE:
         NAME: 'resnext'
         PRETRAINED: True
+        TRANSFER_LEARNING : False
         OUT_CHANNELS: [512, 1024, 1024, 1024, 2048, 2048] 
         INPUT_CHANNELS: 3
     PRIORS:
@@ -20,3 +21,4 @@ SOLVER:
     LR: 1e-2
 OUTPUT_DIR: 'outputs/resnext'
 DATASET_DIR: "datasets"
+EVAL_STEP: 2000
