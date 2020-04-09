@@ -1,6 +1,7 @@
 # from: https://github.com/pytorch/vision/blob/master/torchvision/models/resnet.py
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 from torchvision.models.utils import load_state_dict_from_url
 
 
@@ -36,6 +37,20 @@ class ConvBnReluLayer(nn.Module):
         out = self.relu(out)
         return out
 
+
+def add_extras(in_channel):
+    # Extra layers added to resnet for feature scaling, 
+    # borrowed from https://github.com/yqyao/SSD_Pytorch/blob/master/models/resnet.py
+    layers = []
+    layers += [nn.Conv2d(in_channel, 256, kernel_size=1, stride=1)]
+    layers += [nn.Conv2d(256, 256, kernel_size=3, stride=2, padding=1)]
+    layers += [nn.Conv2d(256, 128, kernel_size=1, stride=1)]
+    layers += [nn.Conv2d(128, 256, kernel_size=3, stride=2, padding=1)]
+    layers += [nn.Conv2d(256, 128, kernel_size=1, stride=1)]
+    layers += [nn.Conv2d(128, 256, kernel_size=3, stride=1, padding=0)]
+
+    return layers
+   
 
 class ExtraLayers(nn.Module):
     
@@ -196,8 +211,6 @@ class ResNet(nn.Module):
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
         self.fc = nn.Linear(512 * block.expansion, num_classes)
 
-        
-
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
                 nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
@@ -247,14 +260,16 @@ class ResNet(nn.Module):
 
         x = self.relu(x)
         x = self.maxpool(x)
-
         x = self.layer1(x)
         x = self.layer2(x)
         features.append(x)
+
         x = self.layer3(x)
-        x = self.layer4(x)
         features.append(x)
 
+        x = self.layer4(x)
+        features.append(x)
+        
         # x = self.avgpool(x)
         # x = torch.flatten(x, 1)
         # x = self.fc(x)
@@ -273,11 +288,18 @@ class ExtendedResNet(nn.Module):
     def __init__(self, resnet):
         super(ExtendedResNet, self).__init__()
         self.resnet = resnet
-        self.extra_layers = ExtraLayers(resnet.inplanes)
+        self.smooth = nn.Conv2d(resnet.inplanes, 512, kernel_size=3, stride=1, padding=1)
+        self.extras = nn.ModuleList(add_extras(resnet.inplanes))
 
     def forward(self, x):
         features = self.resnet(x)
-        features.extend(self.extra_layers(features[-1]))
+        x = features[-1]
+        features[-1] = self.smooth(x)
+        for k, v in enumerate(self.extras):
+            x = F.relu(v(x), inplace=True)
+            if k % 2 == 1:
+                features.append(x)
+
         return features
 
 

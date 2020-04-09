@@ -1,7 +1,7 @@
 MODEL:
     NUM_CLASSES: 5
     BACKBONE:
-        NAME: 'resnet101'
+        NAME: 'resnet50'
         PRETRAINED: True
         OUT_CHANNELS: [512, 1024, 512, 256, 256, 256]
         INPUT_CHANNELS: 3
@@ -22,5 +22,5 @@ SOLVER:
     LR: 1e-3
 EVAL_STEP: 2500
 MODEL_SAVE_STEP: 2500
-OUTPUT_DIR: 'outputs/resnet101'
+OUTPUT_DIR: 'outputs/resnet50'
 DATASET_DIR: "datasets"

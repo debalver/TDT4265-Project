@@ -22,8 +22,8 @@ class SSDDetector(nn.Module):
 
     def forward(self, images, targets=None):
         features = self.backbone(images)
-        # for fe in features:
-        #     print("SHAPE: ", fe.shape)
+        #for fe in features:
+        #    print("SHAPE: ", fe.shape)
         detections, detector_losses = self.box_head(features, targets)
         if self.training:
             return detector_losses
@@ -46,7 +46,12 @@ def build_backbone(cfg):
     if backbone_name == "resnet":
         model = resnet34(cfg.MODEL.BACKBONE.PRETRAINED)
         return model
+    if backbone_name == "resnet50":
+        resnet = resnet50(cfg.MODEL.BACKBONE.PRETRAINED)
+        model = ExtendedResNet(resnet)
+        return model
     if backbone_name == "resnet101":
         resnet = resnet101(cfg.MODEL.BACKBONE.PRETRAINED)
         model = ExtendedResNet(resnet)
         return model
+    
