@@ -12,6 +12,12 @@ MODEL:
         STRIDES: [[8,8], [16,16], [16,16], [16,16], [32,30], [320, 240]]
 INPUT:
     IMAGE_SIZE: [320, 240]
+#     PRIORS:
+#         FEATURE_MAPS: [[45,34], [23, 17], [23,17], [23,17], [12,9], [1,1]]
+#         # strides should be image size/feature_map
+#         STRIDES: [[8,8], [16,16], [16,16], [16,16], [30,30], [360, 270]]
+# INPUT:
+#     IMAGE_SIZE: [360, 270]
 DATASETS:
     TRAIN: ("waymo_train",)
     TEST: ("waymo_val", )
