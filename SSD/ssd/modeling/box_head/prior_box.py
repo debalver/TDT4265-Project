@@ -23,11 +23,12 @@ class PriorBox:
         """
         priors = []
         for k, f in enumerate(self.feature_maps):
-            scale = self.image_size[0] / self.strides[k]
-            for i, j in product(range(f[0]), repeat=2):
+            scale_width = self.image_size[0] / self.strides[k][0]
+            scale_height = self.image_size[1] / self.strides[k][1]
+            for i, j in product(range(f[0]), range(f[1])):
                 # unit center x,y
-                cx = (j + 0.5) / scale
-                cy = (i + 0.5) / scale
+                cx = (j + 0.5) / scale_width
+                cy = (i + 0.5) / scale_height
 
                 # small sized square box
                 size = self.min_sizes[k]
