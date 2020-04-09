@@ -205,30 +205,34 @@ class ResNet(nn.Module):
         features = []
 
         # See note [TorchScript super()]
+        # Preprocessing, no interesting features yet 
         x = self.conv1(x)
         x = self.bn1(x)
         x = self.relu(x)
         x = self.maxpool(x)
-
+        # Features from layer1 are 75x75, way too big for our GPU, so we don't take them
         x = self.layer1(x)
-        features.append(x)
         x = self.layer2(x)
         features.append(x)
-        x = self.layer3(x)
-        features.append(x)
+        
+        # Continue the forward pass and extract the features form blocks 2,4 and 6 of layer3
+        blocks = [1, 3, 5]
+        for idx, block in enumerate(self.layer3):
+            x = block(x)
+            if idx in blocks:
+                features.append(x)
+
         x = self.layer4(x)
         features.append(x)
-
         x = self.avgpool(x)
         features.append(x)
-        for feature in features:
-            print(feature.shape)
+        
         return features
+        
         # The classifier provided by Resnet is not used, we use our own in box_head
         # x = torch.flatten(x, 1)
         # x = self.fc(x)
-
-        return x
+        # return x
 
     def forward(self, x):
         return self._forward_impl(x)
@@ -239,6 +243,28 @@ def _resnet(arch, block, layers, pretrained, progress, **kwargs):
     if pretrained:
         state_dict = load_state_dict_from_url(model_urls[arch],
                                               progress=progress)
+        # Transfer learning ! 
+        for param in model.conv1.parameters(): 
+            param.requires_grad = False
+        for param in model.bn1.parameters(): 
+            param.requires_grad = False
+        for param in model.relu.parameters(): 
+            param.requires_grad = False
+        for param in model.maxpool.parameters(): 
+            param.requires_grad = False
+        for param in model.layer1.parameters(): 
+            param.requires_grad = False
+        for param in model.layer2.parameters(): 
+            param.requires_grad = False
+        for param in model.layer3.parameters(): 
+            param.requires_grad = False
+        for param in model.layer4.parameters(): 
+            param.requires_grad = True
+        for param in model.avgpool.parameters(): 
+            param.requires_grad = True
+        for param in model.fc.parameters(): 
+            param.requires_grad = False
+        
         model.load_state_dict(state_dict)
     return model
 

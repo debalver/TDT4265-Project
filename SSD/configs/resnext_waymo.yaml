@@ -3,10 +3,10 @@ MODEL:
     BACKBONE:
         NAME: 'resnext'
         PRETRAINED: True
-        OUT_CHANNELS: [480, 512, 832, 1024, 1024] # TODO adapt this
+        OUT_CHANNELS: [512, 1024, 1024, 1024, 2048, 2048] 
         INPUT_CHANNELS: 3
     PRIORS:
-        FEATURE_MAPS: [37, 18, 18, 9, 1] # TODO adapt this as well
+        FEATURE_MAPS: [38, 19, 19, 19, 10, 1] 
 INPUT:
     IMAGE_SIZE: 300
 DATASETS:
@@ -17,6 +17,6 @@ SOLVER:
     LR_STEPS: [80000, 100000]
     GAMMA: 0.1
     BATCH_SIZE: 16
-    LR: 1e-3
+    LR: 1e-2
 OUTPUT_DIR: 'outputs/resnext'
 DATASET_DIR: "datasets"
