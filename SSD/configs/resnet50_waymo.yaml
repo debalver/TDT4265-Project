@@ -6,9 +6,10 @@ MODEL:
         OUT_CHANNELS: [512, 1024, 512, 256, 256, 256]
         INPUT_CHANNELS: 3
     PRIORS:
-        FEATURE_MAPS: [38, 19, 10, 5, 3, 1]
+        FEATURE_MAPS: [[30, 40], [15, 20], [8, 10], [4, 5], [2, 3], [1, 2]]
 INPUT:
-    IMAGE_SIZE: 300
+    IMAGE_WIDTH: 320 
+    IMAGE_HEIGHT: 240
 DATASETS:
     TRAIN: ("waymo_train",)
     TEST: ("waymo_val", )
@@ -20,7 +21,7 @@ SOLVER:
     GAMMA: 0.1
     BATCH_SIZE: 16
     LR: 1e-3
-EVAL_STEP: 2500
+EVAL_STEP: 1000
 MODEL_SAVE_STEP: 2500
-OUTPUT_DIR: 'outputs/resnet50'
+OUTPUT_DIR: 'outputs/resnet50_320x240'
 DATASET_DIR: "datasets"

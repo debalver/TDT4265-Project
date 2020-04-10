@@ -47,7 +47,7 @@ def add_extras(in_channel):
     layers += [nn.Conv2d(256, 128, kernel_size=1, stride=1)]
     layers += [nn.Conv2d(128, 256, kernel_size=3, stride=2, padding=1)]
     layers += [nn.Conv2d(256, 128, kernel_size=1, stride=1)]
-    layers += [nn.Conv2d(128, 256, kernel_size=3, stride=1, padding=0)]
+    layers += [nn.Conv2d(128, 256, kernel_size=2, stride=1, padding=0)]
 
     return layers
    

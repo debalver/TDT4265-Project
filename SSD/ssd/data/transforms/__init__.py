@@ -8,13 +8,13 @@ def build_transforms(cfg, is_train=True):
         transform = [
             ConvertFromInts(),
             ToPercentCoords(),
-            Resize(cfg.INPUT.IMAGE_SIZE),
+            Resize((cfg.INPUT.IMAGE_WIDTH, cfg.INPUT.IMAGE_HEIGHT)),
             SubtractMeans(cfg.INPUT.PIXEL_MEAN),
             ToTensor(),
         ]
     else:
         transform = [
-            Resize(cfg.INPUT.IMAGE_SIZE),
+            Resize((cfg.INPUT.IMAGE_WIDTH, cfg.INPUT.IMAGE_HEIGHT)),
             SubtractMeans(cfg.INPUT.PIXEL_MEAN),
             ToTensor()
         ]
