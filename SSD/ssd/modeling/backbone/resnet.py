@@ -201,7 +201,7 @@ class ResNet(nn.Module):
 
     def _forward_impl(self, x):
         # See note [TorchScript super()]
-        f_indices = [1,3]
+        f_indices = [9,17]
         features = []
         x = self.conv1(x)
         x = self.bn1(x)

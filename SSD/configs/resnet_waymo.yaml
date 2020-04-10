@@ -9,7 +9,7 @@ MODEL:
     PRIORS:
         FEATURE_MAPS: [38, 19, 19, 19, 10, 1]
 INPUT:
-    IMAGE_SIZE: [320, 240]
+    IMAGE_SIZE: 300
 DATASETS:
     TRAIN: ("waymo_train",)
     TEST: ("waymo_val", )
