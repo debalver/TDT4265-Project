@@ -8,7 +8,7 @@ MODEL:
     PRIORS:
     #TODO: change last one to [1,1]
         FEATURE_MAPS: [[34, 45], [17, 23], [9, 12], [5, 6], [3, 3], [2, 2]]
-        
+        STRIDES: [[8,8], [16, 16], [30, 30], [54, 60], [90,120], [135, 180]]
 INPUT:
     IMAGE_WIDTH: 360 
     IMAGE_HEIGHT: 270
@@ -23,7 +23,7 @@ SOLVER:
     GAMMA: 0.1
     BATCH_SIZE: 16
     LR: 5e-3
-EVAL_STEP: 5000
+EVAL_STEP: 500
 MODEL_SAVE_STEP: 2500
 OUTPUT_DIR: 'outputs/resnet152_360x270'
 DATASET_DIR: "datasets"
