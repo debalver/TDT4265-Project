@@ -299,7 +299,8 @@ class ExtendedResNet(nn.Module):
             x = F.relu(v(x), inplace=True)
             if k % 2 == 1:
                 features.append(x)
-
+        # average pool in case resolution is to high for 1x1 in last extra
+        features[-1] = resnet.avgpool(x)
         return features
 
 
