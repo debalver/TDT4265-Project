@@ -22,21 +22,6 @@ model_urls = {
     'wide_resnet101_2': 'https://download.pytorch.org/models/wide_resnet101_2-32ee1156.pth',
 }
 
-class ConvBnReluLayer(nn.Module):
-    
-    def __init__(self, inplanes, planes, kernel_size, padding, stride, bias=False):
-        super(ConvBnReluLayer, self).__init__()
-        self.conv = nn.Conv2d(inplanes, planes, kernel_size=kernel_size, padding=padding, 
-                               stride=stride, bias=bias)
-        self.bn = nn.BatchNorm2d(planes)
-        self.relu = nn.ReLU(inplace=True)
-        
-    def forward(self, x):
-        out = self.conv(x)
-        out = self.bn(out)
-        out = self.relu(out)
-        return out
-
 
 def add_extras(in_channel):
     # Extra layers added to resnet for feature scaling, 
@@ -47,32 +32,9 @@ def add_extras(in_channel):
     layers += [nn.Conv2d(256, 128, kernel_size=1, stride=1)]
     layers += [nn.Conv2d(128, 256, kernel_size=3, stride=2, padding=1)]
     layers += [nn.Conv2d(256, 128, kernel_size=1, stride=1)]
-    layers += [nn.Conv2d(128, 256, kernel_size=2, stride=1, padding=0)]
+    layers += [nn.Conv2d(128, 256, kernel_size=(2, 3), stride=1, padding=0)]
 
     return layers
-   
-
-class ExtraLayers(nn.Module):
-    
-    def __init__(self, inplanes):
-        super(ExtraLayers, self).__init__()
-        self.convbnrelu1_1 = ConvBnReluLayer(inplanes, 256, kernel_size=1, padding=0, stride=1)
-        self.convbnrelu1_2 = ConvBnReluLayer(256, 512, kernel_size=3, padding=1, stride=2)
-        self.convbnrelu2_1 = ConvBnReluLayer(512, 256, kernel_size=1, padding=0, stride=1)
-        self.convbnrelu2_2 = ConvBnReluLayer(256, 512, kernel_size=3, padding=1, stride=2) 
-        self.convbnrelu3_1 = ConvBnReluLayer(512, 256, kernel_size=1, padding=0, stride=1)
-        self.convbnrelu3_2 = ConvBnReluLayer(256, 512, kernel_size=3, padding=1, stride=2)
-        self.avgpool = nn.AvgPool2d(3, stride=1)
-        
-    def forward(self, x):
-        out1_1 = self.convbnrelu1_1(x)
-        out1_2 = self.convbnrelu1_2(out1_1)
-        out2_1 = self.convbnrelu2_1(out1_2)
-        out2_2 = self.convbnrelu2_2(out2_1)
-        out3_1 = self.convbnrelu3_1(out2_2)
-        out3_2 = self.convbnrelu3_2(out3_1)
-        out = self.avgpool(out3_1)
-        return out1_2, out2_2, out3_2, out
 
 
 def conv3x3(in_planes, out_planes, stride=1, groups=1, dilation=1):
