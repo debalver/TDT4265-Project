@@ -217,19 +217,19 @@ class ResNet(nn.Module):
     def _forward_impl(self, x):
         # See note [TorchScript super()]
         features = []
-        x = self.conv1(x)
+        x = self.conv1(x)   # stride 2
         x = self.bn1(x)
 
         x = self.relu(x)
-        x = self.maxpool(x)
-        x = self.layer1(x)
-        x = self.layer2(x)
+        x = self.maxpool(x) # stride 4
+        x = self.layer1(x)  # stride 8
+        x = self.layer2(x)  # stride 16
         features.append(x)
 
-        x = self.layer3(x)
+        x = self.layer3(x)  # stride 32
         features.append(x)
 
-        x = self.layer4(x)
+        x = self.layer4(x)  # stride 64
         features.append(x)
         
         # x = self.avgpool(x)
@@ -262,7 +262,7 @@ class ExtendedResNet(nn.Module):
             if k % 2 == 1:
                 features.append(x)
         # average pool in case resolution is to high for 1x1 in last extra
-        features[-1] = resnet.avgpool(x)
+        features[-1] = self.resnet.avgpool(x)
         return features
 
 
