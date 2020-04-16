@@ -1,0 +1,32 @@
+MODEL:
+    NUM_CLASSES: 5
+    BACKBONE:
+        NAME: 'custom'
+        PRETRAINED: True
+        #TODO: check whether output fetures are correct for resnet 34
+        #selected_outputs = [3, 5, 6, 8, 10, 12, 13, 15, avgpool]
+        #selected_outputs = [2, 6, 12, 13, 15, avgpool]
+        #selected_outputs = [3, 6, 12, 15, avgpool]
+        OUT_CHANNELS: [128, 256, 512, 512,     192, 288, 768, 768, 1280, 2048, 2048]
+        INPUT_CHANNELS: 3
+    PRIORS:
+        FEATURE_MAPS: [38, 19, 10, 1,     35, 35, 17, 17, 8, 8, 1]
+        STRIDES: [8, 16, 30, 300,    8, 8, 17, 17, 37, 37, 299]
+        MIN_SIZES: [30, 60, 111, 162,    30, 60, 111, 162, 213, 264, 315]
+        MAX_SIZES: [60, 111, 162, 213,    60, 111, 162, 213, 264, 315, 366]
+        ASPECT_RATIOS: [[2], [2,3], [2,3], [2],    [2], [2, 3], [2, 3], [2, 3], [2], [2], [2]]
+        BOXES_PER_LOCATION: [4, 6, 6, 4,    4, 6, 6, 6, 4, 4, 4]
+INPUT:
+    IMAGE_SIZE: 300
+DATASETS:
+    TRAIN: ("waymo_train",)
+    TEST: ("waymo_val", )
+SOLVER:
+    MAX_ITER: 120000
+    LR_STEPS: [80000, 100000]
+    GAMMA: 0.1
+    BATCH_SIZE: 16
+    LR: 1e-3
+OUTPUT_DIR: 'outputs/custom/'
+DATASET_DIR: "datasets"
+EVAL_STEP: 2000
