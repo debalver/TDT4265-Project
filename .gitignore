@@ -131,3 +131,6 @@ dmypy.json
 # don't push datasets
 SSD/datasets/
 SSD/outputs/
+
+#VSC
+.vscode/

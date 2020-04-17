@@ -27,12 +27,12 @@ def add_extras(in_channel):
     # Extra layers added to resnet for feature scaling, 
     # borrowed from https://github.com/yqyao/SSD_Pytorch/blob/master/models/resnet.py
     layers = []
-    layers += [nn.Conv2d(in_channel, 256, kernel_size=1, stride=1)]
-    layers += [nn.Conv2d(256, 256, kernel_size=3, stride=2, padding=1)]
-    layers += [nn.Conv2d(256, 128, kernel_size=1, stride=1)]
-    layers += [nn.Conv2d(128, 256, kernel_size=3, stride=2, padding=1)]
-    layers += [nn.Conv2d(256, 128, kernel_size=1, stride=1)]
-    layers += [nn.Conv2d(128, 256, kernel_size=(2, 3), stride=1, padding=0)]
+    layers += [nn.Conv2d(in_channel, 1024, kernel_size=1, stride=1)]
+    layers += [nn.Conv2d(1024, 1024, kernel_size=5, stride=2, padding=2)]
+    layers += [nn.Conv2d(1024, 1024, kernel_size=1, stride=1)]
+    layers += [nn.Conv2d(1024, 1024, kernel_size=3, stride=2, padding=1)]
+    layers += [nn.Conv2d(1024, 1024, kernel_size=1, stride=1)]
+    layers += [nn.Conv2d(1024, 1024, kernel_size=(2, 3), stride=1, padding=0)]
 
     return layers
 
@@ -250,8 +250,9 @@ class ExtendedResNet(nn.Module):
     def __init__(self, resnet):
         super(ExtendedResNet, self).__init__()
         self.resnet = resnet
-        self.smooth = nn.Conv2d(resnet.inplanes, 512, kernel_size=3, stride=1, padding=1)
+        self.smooth = nn.Conv2d(resnet.inplanes, 1024, kernel_size=3, stride=1, padding=1)
         self.extras = nn.ModuleList(add_extras(resnet.inplanes))
+        self.bn = nn.BatchNorm2d(1024)
 
     def forward(self, x):
         features = self.resnet(x)
@@ -259,6 +260,7 @@ class ExtendedResNet(nn.Module):
         features[-1] = self.smooth(x)
         for k, v in enumerate(self.extras):
             x = F.relu(v(x), inplace=True)
+            x = self.bn(x)
             if k % 2 == 1:
                 features.append(x)
         # average pool in case resolution is to high for 1x1 in last extra
