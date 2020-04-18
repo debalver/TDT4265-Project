@@ -6,6 +6,8 @@ from .transforms import *
 def build_transforms(cfg, is_train=True):
     if is_train:
         transform = [
+            RandomAddSnow(),
+            RandomAddFog(),
             ConvertFromInts(),
             PhotometricDistort(),
             Expand(cfg.INPUT.PIXEL_MEAN),
@@ -13,13 +15,13 @@ def build_transforms(cfg, is_train=True):
             RandomMirror(),
             ToPercentCoords(),
             Resize((cfg.INPUT.IMAGE_WIDTH, cfg.INPUT.IMAGE_HEIGHT)),
-            SubtractMeans(cfg.INPUT.PIXEL_MEAN),
+            Normalize(cfg.INPUT.PIXEL_MEAN, cfg.INPUT.PIXEL_STD),
             ToTensor(),
         ]
     else:
         transform = [
             Resize((cfg.INPUT.IMAGE_WIDTH, cfg.INPUT.IMAGE_HEIGHT)),
-            SubtractMeans(cfg.INPUT.PIXEL_MEAN),
+            Normalize(cfg.INPUT.PIXEL_MEAN, cfg.INPUT.PIXEL_STD),
             ToTensor()
         ]
     transform = Compose(transform)

@@ -2,23 +2,22 @@ MODEL:
     NUM_CLASSES: 5
     BACKBONE:
         NAME: 'resnet50'
-        PRETRAINED: False
+        PRETRAINED: True
         OUT_CHANNELS: [512, 1024, 512, 256, 256, 256]
         INPUT_CHANNELS: 3
     PRIORS:
         FEATURE_MAPS: [[30, 40], [15, 20], [8, 10], [4, 5], [2, 3], [1, 1]]
         STRIDES: [[8,8], [16, 16], [30, 32], [60, 64], [120, 106], [240, 320]]
-        ASPECT_RATIOS: [[2, 3], [2, 3], [2, 3], [2, 3], [2, 3], [2, 3]]
-        BOXES_PER_LOCATION: [6, 6, 6, 6, 6, 6]
 INPUT:
     IMAGE_WIDTH: 320
     IMAGE_HEIGHT: 240
     PIXEL_MEAN: [92, 101, 114]
+    PIXEL_STD: [56,  62, 73]
 DATASETS:
     TRAIN: ("waymo_train",)
     TEST: ("waymo_val", )
 DATA_LOADER:
-  NUM_WORKERS: 4
+  NUM_WORKERS: 8
 SOLVER:
     MAX_ITER: 320000
     LR_STEPS: [80000, 100000]
@@ -27,5 +26,5 @@ SOLVER:
     LR: 1e-3
 EVAL_STEP: 1000
 MODEL_SAVE_STEP: 2500
-OUTPUT_DIR: 'outputs/resnet50_320x240_data_aug'
+OUTPUT_DIR: 'outputs/resnet50_320x240_more_data_aug_8_workers_2'
 DATASET_DIR: "datasets"
