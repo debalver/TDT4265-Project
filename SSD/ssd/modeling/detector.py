@@ -2,7 +2,7 @@ from torch import nn
 from ssd.modeling.backbone.vgg import VGG
 from ssd.modeling.backbone.basic import BasicModel
 from ssd.modeling.box_head.box_head import SSDBoxHead
-from ssd.modeling.backbone.resnet import resnext50_32x4d
+from ssd.modeling.backbone.resnet import resnext50_32x4d, resnet34, MixedArchitecture
 from ssd.utils.model_zoo import load_state_dict_from_url
 from ssd import torch_utils
 
@@ -45,3 +45,8 @@ def build_backbone(cfg):
     if backbone_name == "resnext":
         model = resnext50_32x4d(cfg.MODEL.BACKBONE.PRETRAINED)
         return model
+    if backbone_name == "resnet":
+        resnet = resnet34(cfg)
+        model = MixedArchitecture(cfg, resnet)
+        return model
+    

@@ -121,10 +121,149 @@ class Bottleneck(nn.Module):
 
         return out
 
+class MixedArchitecture(nn.Module):
+    
+    def __init__(self, cfg, resnet):
+        super().__init__()
+        output_channels = cfg.MODEL.BACKBONE.OUT_CHANNELS
+        self.output_channels = output_channels
+        self.output_feature_size = cfg.MODEL.PRIORS.FEATURE_MAPS
 
+        self.resnet = resnet
+        
+        self.third = nn.Sequential(
+
+            nn.ReLU(),
+            nn.Conv2d(
+                in_channels=output_channels[1],
+                out_channels=256,
+                kernel_size=5,
+                stride=1,
+                padding=2
+            ),
+            nn.ReLU(),
+            nn.Conv2d(
+                in_channels=256,
+                out_channels=output_channels[4],
+                kernel_size=5,
+                stride=2,
+                padding=2
+            )
+        )
+
+        self.fourth = nn.Sequential(
+
+            nn.ReLU(),
+            nn.Conv2d(
+                in_channels=output_channels[4],
+                out_channels=128,
+                kernel_size=5,
+                stride=1,
+                padding=2
+            ),
+            nn.ReLU(),
+            nn.Conv2d(
+                in_channels=128,
+                out_channels=output_channels[5],
+                kernel_size=5,
+                stride=2,
+                padding=2
+            )
+        )
+
+        self.fifth = nn.Sequential(
+
+            nn.ReLU(),
+            nn.Conv2d(
+                in_channels=output_channels[5],
+                out_channels=128,
+                kernel_size=5,
+                stride=1,
+                padding=2
+            ),
+            nn.ReLU(),
+            nn.Conv2d(
+                in_channels=128,
+                out_channels=output_channels[6],
+                kernel_size=5,
+                stride=2,
+                padding=2
+            )
+        )
+
+        self.sixth = nn.Sequential(
+
+            nn.ReLU(),
+            nn.Conv2d(
+                in_channels=output_channels[6],
+                out_channels=128,
+                kernel_size=5,
+                stride=1,
+                padding=2
+            ),
+            # Start of attempt 
+            nn.ReLU(),
+            nn.Conv2d(
+                in_channels=128,
+                out_channels=256,
+                kernel_size=5,
+                stride=1,
+                padding=2
+            ),
+            nn.ReLU(),
+            nn.Conv2d(
+                in_channels=256,
+                out_channels=128,
+                kernel_size=5,
+                stride=1,
+                padding=2
+            ),
+            # End of attempt
+            nn.ReLU(),
+            nn.Conv2d(
+                in_channels=128,
+                out_channels=output_channels[7],
+                kernel_size=3,
+                stride=1,
+                padding=0
+            )
+        )
+    
+    def forward(self, x):
+        """
+        The forward function should output features with shape:
+            shape(-1, output_channels[2], 10, 10),
+            shape(-1, output_channels[3], 5, 5),
+            shape(-1, output_channels[3], 3, 3),
+            shape(-1, output_channels[4], 1, 1)]
+        We have added assertion tests to check this, iteration through out_features,
+        where out_features[0] should have the shape:
+            shape(-1, output_channels[0], 38, 38),
+        """
+    
+        # For some reason .append(x) doesn't work with the mixed architecture, I have to use indexing 
+        out_features = [None]*8
+        
+        # Compute the output from resnet backbone 
+        resnet_output = self.resnet(x)
+        
+        for i, layer in enumerate(resnet_output):
+            out_features[i] = layer
+        
+        # Compute the output from mixed architecture 
+        # Input the 19x19 output from resnet into our mixed architecture
+        out_features[4] = self.third(resnet_output[1])
+        out_features[5] = self.fourth(out_features[4])
+        out_features[6] = self.fifth(out_features[5])
+        out_features[7] = self.sixth(out_features[6])       
+        
+        return out_features
+        
+    
+    
 class ResNet(nn.Module):
 
-    def __init__(self, block, layers, num_classes=1000, zero_init_residual=False,
+    def __init__(self, cfg, block, layers, num_classes=1000, zero_init_residual=False,
                  groups=1, width_per_group=64, replace_stride_with_dilation=None,
                  norm_layer=None):
         super(ResNet, self).__init__()
@@ -150,7 +289,7 @@ class ResNet(nn.Module):
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
         self.layer1 = self._make_layer(block, 64, layers[0])
         self.layer2 = self._make_layer(block, 128, layers[1], stride=2,
-                                       dilate=replace_stride_with_dilation[0])
+                                       dilate=replace_stride_with_dilation[0]) 
         self.layer3 = self._make_layer(block, 256, layers[2], stride=2,
                                        dilate=replace_stride_with_dilation[1])
         self.layer4 = self._make_layer(block, 512, layers[3], stride=2,
@@ -210,21 +349,19 @@ class ResNet(nn.Module):
         x = self.bn1(x)
         x = self.relu(x)
         x = self.maxpool(x)
-        # Features from layer1 are 75x75, way too big for our GPU, so we don't take them
         x = self.layer1(x)
+        # 75x75
         x = self.layer2(x)
+        # 38x38
         features.append(x)
-        
-        # Continue the forward pass and extract the features form blocks 2,4 and 6 of layer3
-        blocks = [1, 3, 5]
-        for idx, block in enumerate(self.layer3):
-            x = block(x)
-            if idx in blocks:
-                features.append(x)
-
+        x = self.layer3(x)
+        # 19x19
+        features.append(x)
         x = self.layer4(x)
+        # 10x10
         features.append(x)
         x = self.avgpool(x)
+        # 1x1 
         features.append(x)
         
         return features
@@ -238,13 +375,13 @@ class ResNet(nn.Module):
         return self._forward_impl(x)
 
 
-def _resnet(arch, block, layers, pretrained, transfer_learning, progress, **kwargs):
-    model = ResNet(block, layers, **kwargs)
-    if pretrained:
+def _resnet(cfg, arch, block, layers, progress, **kwargs):
+    model = ResNet(cfg, block, layers, **kwargs)
+    if cfg.MODEL.BACKBONE.PRETRAINED:
         state_dict = load_state_dict_from_url(model_urls[arch],
                                               progress=progress)
         # Transfer learning ! 
-        if transfer_learning:
+        if cfg.MODEL.BACKBONE.TRANSFER_LEARNING:
             for param in model.conv1.parameters(): 
                 param.requires_grad = False
             for param in model.bn1.parameters(): 
@@ -281,14 +418,14 @@ def resnet18(pretrained=False, progress=True, **kwargs):
                    **kwargs)
 
 
-def resnet34(pretrained=False, progress=True, **kwargs):
+def resnet34(cfg, progress=True, **kwargs):
     r"""ResNet-34 model from
     `"Deep Residual Learning for Image Recognition" <https://arxiv.org/pdf/1512.03385.pdf>`_
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
         progress (bool): If True, displays a progress bar of the download to stderr
     """
-    return _resnet('resnet34', BasicBlock, [3, 4, 6, 3], pretrained, progress,
+    return _resnet(cfg, 'resnet34', BasicBlock, [3, 4, 6, 3], progress,
                    **kwargs)
 
 

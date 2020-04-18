@@ -21,4 +21,4 @@ SOLVER:
     LR: 1e-2
 OUTPUT_DIR: 'outputs/resnext'
 DATASET_DIR: "datasets"
-EVAL_STEP: 2000
+EVAL_STEP: 1

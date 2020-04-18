@@ -96,8 +96,7 @@ class BoxPredictor(nn.Module):
             cls_logit = cls_header(feature).permute(0, 2, 3, 1).contiguous()
             bbox_pred = reg_header(feature).permute(0, 2, 3, 1).contiguous()
             cls_logits.append(cls_logit)
-            bbox_preds.append(bbox_pred)
-
+            bbox_preds.append(bbox_pred) 
         batch_size = features[0].shape[0]
         cls_logits = torch.cat(
             [c.view(c.shape[0], -1) for c in cls_logits],
