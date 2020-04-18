@@ -9,6 +9,8 @@ MODEL:
         FEATURE_MAPS: [38, 19, 10, 5, 3, 1]
 INPUT:
     IMAGE_SIZE: 300
+    PIXEL_MEAN: [92, 101, 114]
+    PIXEL_STD: [56,  62, 73]
 DATASETS:
     TRAIN: ("waymo_train",)
     TEST: ("waymo_val", )

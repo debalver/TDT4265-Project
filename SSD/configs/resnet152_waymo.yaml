@@ -12,6 +12,8 @@ MODEL:
 INPUT:
     IMAGE_WIDTH: 360
     IMAGE_HEIGHT: 270
+    PIXEL_MEAN: [92, 101, 114]
+    PIXEL_STD: [56,  62, 73]
 DATASETS:
     TRAIN: ("waymo_train",)
     TEST: ("waymo_val", )
