@@ -45,7 +45,7 @@ def build_backbone(cfg):
     if backbone_name == "resnext":
         model = resnext50_32x4d(cfg.MODEL.BACKBONE.PRETRAINED)
         return model
-    if backbone_name == "resnet":
+    if backbone_name == "mixed":
         resnet = resnet34(cfg)
         model = MixedArchitecture(cfg, resnet)
         return model
