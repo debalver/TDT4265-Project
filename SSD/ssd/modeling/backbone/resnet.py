@@ -144,7 +144,7 @@ class MixedArchitecture(nn.Module):
             nn.ReLU(),
             nn.Conv2d(
                 in_channels=256,
-                out_channels=output_channels[2],
+                out_channels=output_channels[4],
                 kernel_size=5,
                 stride=2,
                 padding=2
@@ -155,7 +155,7 @@ class MixedArchitecture(nn.Module):
 
             nn.ReLU(),
             nn.Conv2d(
-                in_channels=output_channels[2],
+                in_channels=output_channels[4],
                 out_channels=128,
                 kernel_size=5,
                 stride=1,
@@ -164,7 +164,7 @@ class MixedArchitecture(nn.Module):
             nn.ReLU(),
             nn.Conv2d(
                 in_channels=128,
-                out_channels=output_channels[3],
+                out_channels=output_channels[5],
                 kernel_size=5,
                 stride=2,
                 padding=2
@@ -175,7 +175,7 @@ class MixedArchitecture(nn.Module):
 
             nn.ReLU(),
             nn.Conv2d(
-                in_channels=output_channels[3],
+                in_channels=output_channels[5],
                 out_channels=128,
                 kernel_size=5,
                 stride=1,
@@ -184,7 +184,7 @@ class MixedArchitecture(nn.Module):
             nn.ReLU(),
             nn.Conv2d(
                 in_channels=128,
-                out_channels=output_channels[4],
+                out_channels=output_channels[6],
                 kernel_size=5,
                 stride=2,
                 padding=2
@@ -195,7 +195,7 @@ class MixedArchitecture(nn.Module):
 
             nn.ReLU(),
             nn.Conv2d(
-                in_channels=output_channels[4],
+                in_channels=output_channels[6],
                 out_channels=128,
                 kernel_size=5,
                 stride=1,
@@ -222,7 +222,7 @@ class MixedArchitecture(nn.Module):
             nn.ReLU(),
             nn.Conv2d(
                 in_channels=128,
-                out_channels=output_channels[5],
+                out_channels=output_channels[7],
                 kernel_size=3,
                 stride=1,
                 padding=0
@@ -242,7 +242,7 @@ class MixedArchitecture(nn.Module):
         """
     
         # For some reason .append(x) doesn't work with the mixed architecture, I have to use indexing 
-        out_features = [None]*6
+        out_features = [None]*8
         
         # Compute the output from resnet backbone 
         resnet_output = self.resnet(x)
@@ -252,10 +252,10 @@ class MixedArchitecture(nn.Module):
         
         # Compute the output from mixed architecture 
         # Input the 19x19 output from resnet into our mixed architecture
-        out_features[2] = self.third(resnet_output[1]) 
-        out_features[3] = self.fourth(out_features[2])
-        out_features[4] = self.fifth(out_features[3])
-        out_features[5] = self.sixth(out_features[4]) 
+        out_features[4] = self.third(resnet_output[1]) 
+        out_features[5] = self.fourth(out_features[4])
+        out_features[6] = self.fifth(out_features[5])
+        out_features[7] = self.sixth(out_features[6]) 
         
         return out_features
         
@@ -359,10 +359,10 @@ class ResNet(nn.Module):
         features.append(x)
         x = self.layer4(x)
         # 10x10
-        #features.append(x)
+        features.append(x)
         x = self.avgpool(x)
         # 1x1 
-        #features.append(x)
+        features.append(x)
         
         return features
         
