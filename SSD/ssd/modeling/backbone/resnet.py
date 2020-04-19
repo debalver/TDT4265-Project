@@ -121,6 +121,8 @@ class Bottleneck(nn.Module):
 
         return out
 
+ 
+    
 class MixedArchitecture(nn.Module):
     
     def __init__(self, cfg, resnet):
@@ -128,134 +130,115 @@ class MixedArchitecture(nn.Module):
         output_channels = cfg.MODEL.BACKBONE.OUT_CHANNELS
         self.output_channels = output_channels
         self.output_feature_size = cfg.MODEL.PRIORS.FEATURE_MAPS
+        norm_layer = nn.BatchNorm2d
 
         self.resnet = resnet
         
-        self.third = nn.Sequential(
-
-            nn.ReLU(),
-            nn.Conv2d(
-                in_channels=output_channels[1],
-                out_channels=256,
-                kernel_size=5,
-                stride=1,
-                padding=2
-            ),
-            nn.ReLU(),
-            nn.Conv2d(
-                in_channels=256,
-                out_channels=output_channels[4],
-                kernel_size=5,
-                stride=2,
-                padding=2
-            )
+        # Attempt to copy resnet architecture to output a 5x5, 3x3 and 1x1 feature maps 
+        # According to SSD paper, there is 5x5 256 channels and 3x3 256 and 1x1 256
+       
+        
+        # The first block takes as input the output from layer4, a 10x10 512 channels 
+        # And should output a 5x5 output_channels[4]    
+        self.block1 = nn.Sequential(    
+            conv1x1(output_channels[2], 512),
+            norm_layer(512),
+            nn.Conv2d(512, 256, kernel_size=3, stride=1, padding=0, bias=False, dilation=1),
+            norm_layer(256),
+            nn.Conv2d(256, output_channels[4], kernel_size=1, stride=2, padding=1, bias=False, dilation=1),
+            norm_layer(output_channels[4]),
         )
-
-        self.fourth = nn.Sequential(
-
-            nn.ReLU(),
-            nn.Conv2d(
-                in_channels=output_channels[4],
-                out_channels=128,
-                kernel_size=5,
-                stride=1,
-                padding=2
-            ),
-            nn.ReLU(),
-            nn.Conv2d(
-                in_channels=128,
-                out_channels=output_channels[5],
-                kernel_size=5,
-                stride=2,
-                padding=2
-            )
+        self.relu = nn.ReLU(inplace=True)
+        
+        
+        # Second mixed block, should output a 3x3 output_channels[5]    
+        self.block2 = nn.Sequential(    
+            conv1x1(output_channels[4], 512),
+            norm_layer(512),
+            nn.Conv2d(512, 256, kernel_size=3, stride=1, padding=0, bias=False, dilation=1),
+            norm_layer(256),
+            conv1x1(256, output_channels[5]),
+            norm_layer(output_channels[5]),
         )
-
-        self.fifth = nn.Sequential(
-
-            nn.ReLU(),
-            nn.Conv2d(
-                in_channels=output_channels[5],
-                out_channels=128,
-                kernel_size=5,
-                stride=1,
-                padding=2
-            ),
-            nn.ReLU(),
-            nn.Conv2d(
-                in_channels=128,
-                out_channels=output_channels[6],
-                kernel_size=5,
-                stride=2,
-                padding=2
-            )
+        # One more ReLU here 
+        
+        # Third mixed block, should output a 1x1 output_channels[6]    
+        self.block3 = nn.Sequential(    
+            conv1x1(output_channels[5], 512),
+            norm_layer(512),
+            nn.Conv2d(512, 256, kernel_size=3, stride=1, padding=0, bias=False, dilation=1),
+            norm_layer(256),
+            conv1x1(256, output_channels[6]),
+            norm_layer(output_channels[6])
         )
-
-        self.sixth = nn.Sequential(
-
-            nn.ReLU(),
-            nn.Conv2d(
-                in_channels=output_channels[6],
-                out_channels=128,
-                kernel_size=5,
-                stride=1,
-                padding=2
-            ),
-            # Start of attempt 
-            nn.ReLU(),
-            nn.Conv2d(
-                in_channels=128,
-                out_channels=256,
-                kernel_size=5,
-                stride=1,
-                padding=2
-            ),
-            nn.ReLU(),
-            nn.Conv2d(
-                in_channels=256,
-                out_channels=128,
-                kernel_size=5,
-                stride=1,
-                padding=2
-            ),
-            # End of attempt
-            nn.ReLU(),
-            nn.Conv2d(
-                in_channels=128,
-                out_channels=output_channels[7],
-                kernel_size=3,
-                stride=1,
-                padding=0
-            )
+        # One more ReLU here
+        
+        self.downsample1 = nn.Sequential(
+            conv1x1(output_channels[2], output_channels[4], 2),
+            norm_layer(output_channels[4])
         )
+        self.downsample2 = nn.Sequential(
+            conv1x1(output_channels[4], output_channels[5], 2),
+            norm_layer(output_channels[5])
+        )
+        self.downsample3 = nn.Sequential(
+            conv1x1(output_channels[5], output_channels[6], 2),
+            norm_layer(output_channels[6])
+        )
+        
     
     def forward(self, x):
         """
         The forward function should output features with shape:
-            shape(-1, output_channels[2], 10, 10),
-            shape(-1, output_channels[3], 5, 5),
-            shape(-1, output_channels[3], 3, 3),
-            shape(-1, output_channels[4], 1, 1)]
-        We have added assertion tests to check this, iteration through out_features,
-        where out_features[0] should have the shape:
-            shape(-1, output_channels[0], 38, 38),
+            resnet output shape(38x38 128, 19x19 256, 10x10 512, 1x1 512)
+            shape(-1, output_channels[4], 5, 5),
+            shape(-1, output_channels[5], 3, 3),
+            shape(-1, output_channels[6], 1, 1)]
         """
     
         # For some reason .append(x) doesn't work with the mixed architecture, I have to use indexing 
-        out_features = [None]*8
+        out_features = [None]*7
         
         # Compute the output from resnet backbone 
         resnet_output = self.resnet(x)
         
         for i, layer in enumerate(resnet_output):
             out_features[i] = layer
+            
+        # Compute the output for the mixed architecture
+        # Take the Resnet ideas with residuals 
+        
+        x = resnet_output[2]
+        identity = self.downsample1(x)
+        x = self.block1(x) 
+        x += identity
+        x = self.relu(x)
+        # The 5x5 output
+        out_features[4] = x
+        identity = self.downsample2(x)
+        x = self.block2(x)
+        x += identity
+        x = self.relu(x)
+        # The 3x3 output 
+        out_features[5] = x
+        identity = self.downsample3(self.downsample3(x))
+        x = self.block3(x)
+        x += identity
+        x = self.relu(x)
+        # The 1x1 output 
+        out_features[6] = x
+        
+        #print("The 7 output features")
+        #for layer in out_features:
+        #    print(layer.shape)
+        
         
         # Compute the output from mixed architecture 
         # Input the 19x19 output from resnet into our mixed architecture
-        out_features[4] = self.third(resnet_output[1]) 
-        out_features[5] = self.fourth(out_features[4])
-        out_features[6] = self.fifth(out_features[5])
-        out_features[7] = self.sixth(out_features[6]) 
+        #out_features[4] = self.third(resnet_output[1]) 
+        #out_features[5] = self.fourth(out_features[4])
+        #out_features[6] = self.fifth(out_features[5])
+        #out_features[7] = self.sixth(out_features[6]) 
         
         return out_features
         
@@ -296,7 +279,8 @@ class ResNet(nn.Module):
                                        dilate=replace_stride_with_dilation[2])
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
         self.fc = nn.Linear(512 * block.expansion, num_classes)
-
+        
+        
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
                 nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
@@ -352,16 +336,16 @@ class ResNet(nn.Module):
         x = self.layer1(x)
         # 75x75
         x = self.layer2(x)
-        # 38x38
+        # 38x38 128 
         features.append(x)
         x = self.layer3(x)
-        # 19x19
+        # 19x19 256 
         features.append(x)
         x = self.layer4(x)
-        # 10x10
+        # 10x10 512 
         features.append(x)
         x = self.avgpool(x)
-        # 1x1 
+        # 1x1 512
         features.append(x)
         
         return features

@@ -4,19 +4,19 @@ MODEL:
         NAME: 'mixed'
         PRETRAINED: True
         TRANSFER_LEARNING : False
-        # 8 outputs version
-        OUT_CHANNELS: [128, 256, 512, 512,    256, 128, 128, 64]
+        # 7 outputs version
+        OUT_CHANNELS: [128, 256, 512, 512,     256, 256, 256]
         # 6 outputs
         #OUT_CHANNELS: [128, 256,    256, 128, 128, 64]
         INPUT_CHANNELS: 3
     PRIORS:
-        # 8 outputs version 
-        FEATURE_MAPS: [38, 19, 10, 1,     10, 5, 3, 1]
-        STRIDES: [8, 16, 30, 300,    30, 60, 100, 300]
-        MIN_SIZES: [30, 60, 111, 264,  111, 162, 213, 264]  
-        MAX_SIZES: [60, 111, 162, 315,    162, 213, 264, 315] 
-        ASPECT_RATIOS: [[2], [2,3], [2,3], [2],    [2, 3], [2, 3], [2, 3], [2]]
-        BOXES_PER_LOCATION: [4, 6, 6, 4,    6, 6, 6, 4]
+        # 7 outputs version 
+        FEATURE_MAPS: [38, 19, 10, 1,      5, 3, 1]
+        STRIDES: [8, 16, 30, 300,     60, 100, 300]
+        MIN_SIZES: [30, 60, 111, 264,   162, 213, 264]  
+        MAX_SIZES: [60, 111, 162, 315,     213, 264, 315] 
+        ASPECT_RATIOS: [[2], [2,3], [2,3], [2],     [2, 3], [2, 3], [2]]
+        BOXES_PER_LOCATION: [4, 6, 6, 4,     6, 6, 4]
         # 6 outputs version 
         #FEATURE_MAPS: [38, 19,     10, 5, 3, 1]
         #STRIDES: [8, 16,     30, 60, 100, 300]
@@ -34,7 +34,8 @@ SOLVER:
     LR_STEPS: [80000, 100000]
     GAMMA: 0.1
     BATCH_SIZE: 16
-    LR: 1e-3
+    LR: 1e-2
+    WARMUP_ITERS: 2000
 OUTPUT_DIR: 'outputs/mixed'
 DATASET_DIR: "datasets"
 EVAL_STEP: 2000
