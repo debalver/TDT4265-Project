@@ -14,8 +14,8 @@ INPUT:
     PIXEL_MEAN: [92, 101, 114]
     PIXEL_STD: [56,  62, 73]
 DATASETS:
-    TRAIN: ("waymo_train",)
-    TEST: ("waymo_val", )
+    TRAIN: ("tdt4265_train",)
+    TEST: ("tdt4265_val", )
 DATA_LOADER:
   NUM_WORKERS: 4
 SOLVER:
@@ -26,5 +26,5 @@ SOLVER:
     LR: 1e-3
 EVAL_STEP: 2500
 MODEL_SAVE_STEP: 2500
-OUTPUT_DIR: 'outputs/resnet101_320x240'
+OUTPUT_DIR: outputs/resnet101_320x240_tdt4265
 DATASET_DIR: "datasets"

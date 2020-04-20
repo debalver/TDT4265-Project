@@ -6,8 +6,8 @@ from .transforms import *
 def build_transforms(cfg, is_train=True):
     if is_train:
         transform = [
-            RandomAddSnow(),
-            RandomAddFog(),
+            #RandomAddSnow(),
+            #RandomAddFog(),
             ConvertFromInts(),
             PhotometricDistort(),
             Expand(cfg.INPUT.PIXEL_MEAN),

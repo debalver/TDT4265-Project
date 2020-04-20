@@ -27,12 +27,17 @@ def add_extras(in_channel):
     # Extra layers added to resnet for feature scaling, 
     # borrowed from https://github.com/yqyao/SSD_Pytorch/blob/master/models/resnet.py
     layers = []
-    layers += [nn.Conv2d(in_channel, 1024, kernel_size=1, stride=1)]
-    layers += [nn.Conv2d(1024, 1024, kernel_size=5, stride=2, padding=2)]
-    layers += [nn.Conv2d(1024, 1024, kernel_size=1, stride=1)]
-    layers += [nn.Conv2d(1024, 1024, kernel_size=3, stride=2, padding=1)]
-    layers += [nn.Conv2d(1024, 1024, kernel_size=1, stride=1)]
-    layers += [nn.Conv2d(1024, 1024, kernel_size=(2, 3), stride=1, padding=0)]
+    layers += [nn.Conv2d(in_channel, 1024, kernel_size=3)]
+    layers += [nn.Dropout(p=0.3)]
+    layers += [nn.Conv2d(1024, 1024, kernel_size=1)]                # to classifier
+    layers += [nn.BatchNorm2d(1024)]
+    layers += [nn.Conv2d(1024, 256, kernel_size=1)]
+    layers += [nn.Dropout(p=0.3)]
+    layers += [nn.Conv2d(256, 512, kernel_size=3, stride=2)]        # to classifier
+    layers += [nn.BatchNorm2d(512)]
+    layers += [nn.Conv2d(512, 128, kernel_size=1)]
+    layers += [nn.Dropout(p=0.3)]
+    layers += [nn.Conv2d(128, 256, kernel_size=(2, 3), stride=1)]    # to classifier
 
     return layers
 
@@ -223,6 +228,7 @@ class ResNet(nn.Module):
         x = self.relu(x)
         x = self.maxpool(x) # stride 4
         x = self.layer1(x)  # stride 8
+        features.append(x)          # feature-fuse with output layer2
         x = self.layer2(x)  # stride 16
         features.append(x)
 
@@ -246,25 +252,52 @@ class ResNet(nn.Module):
         return self._forward_impl(x)
 
 
+class FeatureFuse(nn.Module):
+    def __init__(self, a_inplanes, b_inplanes):
+        super(FeatureFuse, self).__init__()
+        self.conv_a = nn.Sequential(
+            nn.Conv2d(a_inplanes, 256, kernel_size=(3, 3), stride=2, padding=1),
+            nn.Conv2d(256, 512, kernel_size=(1, 1), stride=1),
+            nn.BatchNorm2d(512)
+        )
+        self.bn_b = nn.BatchNorm2d(b_inplanes)
+        self.relu = nn.ReLU()
+
+    def forward(self, a, b):
+        a = self.conv_a(a)
+        b = self.bn_b(b)
+        x = a + b
+        x = self.relu(x)
+        return x
+
+
 class ExtendedResNet(nn.Module):
     def __init__(self, resnet):
         super(ExtendedResNet, self).__init__()
         self.resnet = resnet
+        self.feature_fuse = FeatureFuse(256, 512)
         self.smooth = nn.Conv2d(resnet.inplanes, 1024, kernel_size=3, stride=1, padding=1)
         self.extras = nn.ModuleList(add_extras(resnet.inplanes))
-        self.bn = nn.BatchNorm2d(1024)
 
     def forward(self, x):
         features = self.resnet(x)
+
+        # feature fusion between layer1 and layer2
+        layer_1_2 = self.feature_fuse(features[0], features[1])
+        features = features[1:]
+        features[0] = layer_1_2
+
+        # append features from extra layers
         x = features[-1]
         features[-1] = self.smooth(x)
         for k, v in enumerate(self.extras):
-            x = F.relu(v(x), inplace=True)
-            x = self.bn(x)
-            if k % 2 == 1:
+            x = v(x)
+            if k % 2 == 0:
+                x = F.relu(x, inplace=True)
+            if k % 4 == 2:
                 features.append(x)
         # average pool in case resolution is to high for 1x1 in last extra
-        features[-1] = self.resnet.avgpool(x)
+        # features[-1] = self.resnet.avgpool(x)
         return features
 
 
