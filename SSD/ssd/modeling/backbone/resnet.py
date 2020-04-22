@@ -27,7 +27,7 @@ def add_extras(in_channel):
     # Extra layers added to resnet for feature scaling, 
     # borrowed from https://github.com/yqyao/SSD_Pytorch/blob/master/models/resnet.py
     layers = []
-    layers += [nn.Conv2d(in_channel, 1024, kernel_size=3)]
+    layers += [nn.Conv2d(in_channel, 1024, kernel_size=3, stride=2)]
     layers += [nn.Dropout(p=0.3)]
     layers += [nn.Conv2d(1024, 1024, kernel_size=1)]                # to classifier
     layers += [nn.BatchNorm2d(1024)]
@@ -151,7 +151,7 @@ class ResNet(nn.Module):
         if norm_layer is None:
             norm_layer = nn.BatchNorm2d
         self._norm_layer = norm_layer
-
+        self.block = block
         self.inplanes = 64
         self.dilation = 1
         if replace_stride_with_dilation is None:
@@ -278,6 +278,39 @@ class ExtendedResNet(nn.Module):
         self.feature_fuse = FeatureFuse(256, 512)
         self.smooth = nn.Conv2d(resnet.inplanes, 1024, kernel_size=3, stride=1, padding=1)
         self.extras = nn.ModuleList(add_extras(resnet.inplanes))
+        resnet.block.expansion = 1
+        self.extra1 = self._make_layer(resnet.block, 1024, 2, stride=2)
+        self.extra2 = self._make_layer(resnet.block, 512, 2, stride=2)
+        self.extra3 = self._make_layer(resnet.block, 256, 2, stride=2)
+        self.conv_bn_relu = nn.Sequential(
+            nn.Conv2d(resnet.inplanes, resnet.inplanes, kernel_size=(1, 2), stride=1),
+            nn.BatchNorm2d(resnet.inplanes),
+            nn.ReLU()
+        )
+    
+    def _make_layer(self, block, planes, blocks, stride=1, dilate=False):
+        norm_layer = self.resnet._norm_layer
+        downsample = None
+        previous_dilation = self.resnet.dilation
+        if dilate:
+            self.resnet.dilation *= stride
+            stride = 1
+        if stride != 1 or self.resnet.inplanes != planes * block.expansion:
+            downsample = nn.Sequential(
+                conv1x1(self.resnet.inplanes, planes * block.expansion, stride),
+                norm_layer(planes * block.expansion),
+            )
+
+        layers = []
+        layers.append(block(self.resnet.inplanes, planes, stride, downsample, self.resnet.groups,
+                            self.resnet.base_width, previous_dilation, norm_layer))
+        self.resnet.inplanes = planes * block.expansion
+        for _ in range(1, blocks):
+            layers.append(block(self.resnet.inplanes, planes, groups=self.resnet.groups,
+                                base_width=self.resnet.base_width, dilation=self.resnet.dilation,
+                                norm_layer=norm_layer))
+
+        return nn.Sequential(*layers)
 
     def forward(self, x):
         features = self.resnet(x)
@@ -289,15 +322,26 @@ class ExtendedResNet(nn.Module):
 
         # append features from extra layers
         x = features[-1]
-        features[-1] = self.smooth(x)
-        for k, v in enumerate(self.extras):
-            x = v(x)
-            if k % 2 == 0:
-                x = F.relu(x, inplace=True)
-            if k % 4 == 2:
-                features.append(x)
+
+        x = self.extra1(x)
+        features.append(x)
+        x = self.extra2(x)
+        features.append(x)
+        x = self.extra3(x)
+        x = self.conv_bn_relu(x)
+        features.append(x)
+
+        # features[-1] = self.smooth(x)
+        # for k, v in enumerate(self.extras):
+        #     x = v(x)
+        #     if k % 2 == 0:
+        #         x = F.relu(x, inplace=True)
+        #     if k % 4 == 2:
+        #         features.append(x)
         # average pool in case resolution is to high for 1x1 in last extra
         # features[-1] = self.resnet.avgpool(x)
+        #for f in features:
+        #    print(f.shape)
         return features
 
 
