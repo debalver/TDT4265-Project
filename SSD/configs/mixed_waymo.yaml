@@ -18,8 +18,8 @@ MODEL:
         #assumed that for the highest resolution the max size (for width) is 315/300 * width
         #and min_size is 264/300 * width
 INPUT:
-    IMAGE_WIDTH: 320
-    IMAGE_HEIGHT: 240
+    IMAGE_WIDTH: 300
+    IMAGE_HEIGHT: 300
     PIXEL_MEAN: [92, 101, 114]
     PIXEL_STD: [56,  62, 73]
 DATASETS:
