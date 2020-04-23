@@ -138,7 +138,7 @@ class MixedArchitecture(nn.Module):
         # According to SSD paper, there is 5x5 256 channels and 3x3 256 and 1x1 256
        
         
-        # The first block takes as input the output from layer4, a 10x10 512 channels 
+        # The first block takes as input the output from layer4, a 10x10 2048 channels 
         # And should output a 5x5 output_channels[4]    
         self.block1 = nn.Sequential(    
             conv1x1(output_channels[2], 512),
@@ -166,7 +166,7 @@ class MixedArchitecture(nn.Module):
         self.block3 = nn.Sequential(    
             conv1x1(output_channels[5], 512),
             norm_layer(512),
-            nn.Conv2d(512, 256, kernel_size=3, stride=1, padding=0, bias=False, dilation=1),
+            nn.Conv2d(512, 256, kernel_size=(2, 3), stride=1, padding=0, bias=False, dilation=1),
             norm_layer(256),
             conv1x1(256, output_channels[6]),
             norm_layer(output_channels[6])
@@ -182,7 +182,8 @@ class MixedArchitecture(nn.Module):
             norm_layer(output_channels[5])
         )
         self.downsample3 = nn.Sequential(
-            conv1x1(output_channels[5], output_channels[6], 2),
+            conv1x1(output_channels[5], output_channels[6], 1),
+            nn.AdaptiveAvgPool2d((1, 1)),
             norm_layer(output_channels[6])
         )
         
@@ -221,24 +222,16 @@ class MixedArchitecture(nn.Module):
         x = self.relu(x)
         # The 3x3 output 
         out_features[5] = x
-        identity = self.downsample3(self.downsample3(x))
+        identity = self.downsample3(x)
         x = self.block3(x)
         x += identity
         x = self.relu(x)
         # The 1x1 output 
         out_features[6] = x
         
-        print("The 7 output features")
-        for layer in out_features:
-            print(layer.shape)
-        
-        
-        # Compute the output from mixed architecture 
-        # Input the 19x19 output from resnet into our mixed architecture
-        #out_features[4] = self.third(resnet_output[1]) 
-        #out_features[5] = self.fourth(out_features[4])
-        #out_features[6] = self.fifth(out_features[5])
-        #out_features[7] = self.sixth(out_features[6]) 
+        #print("The 7 output features")
+        #for layer in out_features:
+        #    print(layer.shape) 
         
         return out_features
         
@@ -336,20 +329,17 @@ class ResNet(nn.Module):
         x = self.layer1(x)
         # 75x75
         x = self.layer2(x)
-        # 38x38 128 
+        # 38x38 512 
         features.append(x)
         x = self.layer3(x)
-        # 19x19 256 
+        # 19x19 1024 
         features.append(x)
         x = self.layer4(x)
-        # 10x10 512 
+        # 10x10 2048 
         features.append(x)
         x = self.avgpool(x)
-        # 1x1 512
+        # 1x1 2048
         features.append(x)
-
-        for layer in features:
-            print(layer.shape)
         
         return features
         
