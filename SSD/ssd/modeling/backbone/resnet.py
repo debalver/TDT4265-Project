@@ -228,9 +228,9 @@ class MixedArchitecture(nn.Module):
         # The 1x1 output 
         out_features[6] = x
         
-        #print("The 7 output features")
-        #for layer in out_features:
-        #    print(layer.shape)
+        print("The 7 output features")
+        for layer in out_features:
+            print(layer.shape)
         
         
         # Compute the output from mixed architecture 
@@ -347,6 +347,9 @@ class ResNet(nn.Module):
         x = self.avgpool(x)
         # 1x1 512
         features.append(x)
+
+        for layer in features:
+            print(layer.shape)
         
         return features
         
@@ -413,14 +416,14 @@ def resnet34(cfg, progress=True, **kwargs):
                    **kwargs)
 
 
-def resnet50(pretrained=False, progress=True, **kwargs):
+def resnet50(cfg, progress=True, **kwargs):
     r"""ResNet-50 model from
     `"Deep Residual Learning for Image Recognition" <https://arxiv.org/pdf/1512.03385.pdf>`_
     Args:
         pretrained (bool): If True, returns a model pre-trained on ImageNet
         progress (bool): If True, displays a progress bar of the download to stderr
     """
-    return _resnet('resnet50', Bottleneck, [3, 4, 6, 3], pretrained, progress,
+    return _resnet(cfg, 'resnet50', Bottleneck, [3, 4, 6, 3], progress,
                    **kwargs)
 
 
