@@ -166,7 +166,7 @@ class MixedArchitecture(nn.Module):
         self.block3 = nn.Sequential(    
             conv1x1(output_channels[5], 512),
             norm_layer(512),
-            nn.Conv2d(512, 256, kernel_size=(2, 3), stride=1, padding=0, bias=False, dilation=1),
+            nn.Conv2d(512, 256, kernel_size=3, stride=1, padding=0, bias=False, dilation=1),
             norm_layer(256),
             conv1x1(256, output_channels[6]),
             norm_layer(output_channels[6])
@@ -182,8 +182,8 @@ class MixedArchitecture(nn.Module):
             norm_layer(output_channels[5])
         )
         self.downsample3 = nn.Sequential(
-            conv1x1(output_channels[5], output_channels[6], 1),
-            nn.AdaptiveAvgPool2d((1, 1)),
+            conv1x1(output_channels[5], output_channels[6], 2),
+            conv1x1(output_channels[6], output_channels[6], 2),
             norm_layer(output_channels[6])
         )
         

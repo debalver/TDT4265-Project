@@ -9,17 +9,17 @@ MODEL:
         #OUT_CHANNELS: [128, 256, 512, 512,     256, 256, 256]
         INPUT_CHANNELS: 3
     PRIORS:
-        FEATURE_MAPS: [ 40, 20, 10, 1,                       5, 3, 1]
-        STRIDES: [8, 16, 32, 320,                       64, 106, 320]
-        MIN_SIZES: [ 24, 48, 89, 211,                  130, 170, 211]
-        MAX_SIZES: [ 48, 89, 130, 252,                170, 211, 252]] # [WIDTH, HEIGHT]
+        FEATURE_MAPS: [[30, 40], [15, 20], [8, 10], [1, 1],                      [4, 5], [2, 3], [1, 1]]
+        STRIDES: [[8,8], [16, 16], [30, 32], [240, 320],               [60, 64], [120, 106], [240, 320]]
+        MIN_SIZES: [[32, 24], [64, 48], [118, 89], [282, 211],       [173, 130], [227, 170], [282, 211]]
+        MAX_SIZES: [[64, 48], [118, 89], [173, 130], [336, 252],     [227, 170], [282, 211], [336, 252]] # [WIDTH, HEIGHT]
         ASPECT_RATIOS: [[2], [2, 3], [2, 3], [2],                                      [2, 3], [2], [2]]
         BOXES_PER_LOCATION:                          [4, 6, 6, 4,                                6, 4, 4]
         #assumed that for the highest resolution the max size (for width) is 315/300 * width
         #and min_size is 264/300 * width
 INPUT:
-    IMAGE_WIDTH: 300
-    IMAGE_HEIGHT: 300
+    IMAGE_WIDTH: 320
+    IMAGE_HEIGHT: 240
     PIXEL_MEAN: [92, 101, 114]
     PIXEL_STD: [56,  62, 73]
 DATASETS:
