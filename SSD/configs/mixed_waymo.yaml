@@ -12,7 +12,7 @@ MODEL:
         FEATURE_MAPS: [ 40, 20, 10, 1,                       5, 3, 1]
         STRIDES: [8, 16, 32, 320,                       64, 106, 320]
         MIN_SIZES: [ 24, 48, 89, 211,                  130, 170, 211]
-        MAX_SIZES: [ 48, 89, 130, 252,                170, 211, 252]] # [WIDTH, HEIGHT]
+        MAX_SIZES: [ 48, 89, 130, 252,                170, 211, 252] # [WIDTH, HEIGHT]
         ASPECT_RATIOS: [[2], [2, 3], [2, 3], [2],                                      [2, 3], [2], [2]]
         BOXES_PER_LOCATION:                          [4, 6, 6, 4,                                6, 4, 4]
         #assumed that for the highest resolution the max size (for width) is 315/300 * width
