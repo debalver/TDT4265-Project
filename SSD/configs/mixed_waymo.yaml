@@ -3,7 +3,10 @@ MODEL:
     BACKBONE:
         NAME: 'mixed'
         PRETRAINED: True
-        OUT_CHANNELS: [512, 1024, 2048, 2048,   1024, 512, 256]
+        # For resnet50
+        #OUT_CHANNELS: [512, 1024, 2048, 2048,   1024, 512, 256]
+        # For resnet34 
+        OUT_CHANNELS: [128, 256, 512, 512,     256, 256, 256]
         INPUT_CHANNELS: 3
     PRIORS:
         FEATURE_MAPS: [[30, 40], [15, 20], [8, 10], [1, 1],                      [4, 5], [2, 3], [1, 1]]
