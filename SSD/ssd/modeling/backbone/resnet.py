@@ -229,9 +229,9 @@ class MixedArchitecture(nn.Module):
         # The 1x1 output 
         out_features[6] = x
         
-        #print("The 7 output features")
-        #for layer in out_features:
-        #    print(layer.shape) 
+        print("The 7 output features")
+        for layer in out_features:
+            print(layer.shape)
         
         return out_features
         
