@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from resnet import resnet50
+from ssd.modeling.backbone.resnet import resnet50
 
 
 class Conv2d(nn.Module):
@@ -171,20 +171,6 @@ class Inception_ResNetv2(nn.Module):
     def __init__(self, in_channels=3, classes=1000, k=256, l=256, m=384, n=384):
         super(Inception_ResNetv2, self).__init__()
         blocks = []
-        blocks.append(Stem(in_channels))
-        for i in range(10):
-            blocks.append(Inception_ResNet_A(320, 0.17))
-        blocks.append(Reduction_A(320, k, l, m, n))
-        for i in range(20):
-            blocks.append(Inception_ResNet_B(1088, 0.10))
-        blocks.append(Reduction_B(1088))
-        for i in range(9):
-            blocks.append(Inception_ResNet_C(2080, 0.20))
-        blocks.append(Inception_ResNet_C(2080, activation=False))
-        self.features = nn.Sequential(*blocks)
-        self.conv = Conv2d(2080, 1536, 1, stride=1, padding=0, bias=False)
-        self.global_average_pooling = nn.AdaptiveAvgPool2d((1, 1))
-        # self.linear = nn.Linear(1536, classes)
         self.stem = Stem(in_channels)
         blocks = []
         for i in range(10):
@@ -202,11 +188,12 @@ class Inception_ResNetv2(nn.Module):
         self.block_C = nn.Sequential(*blocks)
         resnet = resnet50(False)
         self.resnet = resnet
+        self.resnet.inplanes = 2080
         self.extra1 = self._make_layer(resnet.block, 1024, 2, stride=2)
         self.extra2 = self._make_layer(resnet.block, 512, 2, stride=2)
         self.extra3 = self._make_layer(resnet.block, 256, 2, stride=2)
         self.conv_bn_relu = nn.Sequential(
-            nn.Conv2d(resnet.inplanes, resnet.inplanes, kernel_size=(1, 2), stride=1),
+            nn.Conv2d(resnet.inplanes, resnet.inplanes, kernel_size=(1, 1), stride=1),
             nn.BatchNorm2d(resnet.inplanes),
             nn.ReLU()
         )
@@ -254,7 +241,7 @@ class Inception_ResNetv2(nn.Module):
         x = self.extra3(x)
         x = self.conv_bn_relu(x)
         features.append(x)
-        for f in features:
-            print(f.shape)
+        #for f in features:
+        #    print(f.shape)
 
-        return x
+        return features
