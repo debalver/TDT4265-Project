@@ -257,8 +257,8 @@ class FeatureFuse(nn.Module):
         super(FeatureFuse, self).__init__()
         self.conv_a = nn.Sequential(
             nn.Conv2d(a_inplanes, 256, kernel_size=(3, 3), stride=2, padding=1),
-            nn.Conv2d(256, 512, kernel_size=(1, 1), stride=1),
-            nn.BatchNorm2d(512)
+            nn.Conv2d(256, b_inplanes, kernel_size=(1, 1), stride=1),
+            nn.BatchNorm2d(b_inplanes)
         )
         self.bn_b = nn.BatchNorm2d(b_inplanes)
         self.relu = nn.ReLU()
@@ -272,16 +272,21 @@ class FeatureFuse(nn.Module):
 
 
 class ExtendedResNet(nn.Module):
-    def __init__(self, resnet):
+    def __init__(self, resnet, cfg):
         super(ExtendedResNet, self).__init__()
         self.resnet = resnet
-        self.feature_fuse = FeatureFuse(256, 512)
-        self.smooth = nn.Conv2d(resnet.inplanes, 1024, kernel_size=3, stride=1, padding=1)
-        self.extras = nn.ModuleList(add_extras(resnet.inplanes))
+        self.out_channels = cfg.MODEL.BACKBONE.OUT_CHANNELS
+        
+        # Modify the first maxpool layer by two conv2d
+        self.resnet.maxpool = conv3x3(64, 64, stride=2)
+        self.feature_fuse = FeatureFuse(64, self.out_channels[0])
+        #self.smooth = nn.Conv2d(resnet.inplanes, 1024, kernel_size=3, stride=1, padding=1)
+        #self.extras = nn.ModuleList(add_extras(resnet.inplanes))
+        #self.adjust = nn.Conv2d(self.out_channels[2], self.out_channels[3], kernel_size=1, stride=1)
         resnet.block.expansion = 1
-        self.extra1 = self._make_layer(resnet.block, 1024, 2, stride=2)
-        self.extra2 = self._make_layer(resnet.block, 512, 2, stride=2)
-        self.extra3 = self._make_layer(resnet.block, 256, 2, stride=2)
+        self.extra1 = self._make_layer(resnet.block, self.out_channels[3], 2, stride=2)
+        self.extra2 = self._make_layer(resnet.block, self.out_channels[4], 2, stride=2)
+        self.extra3 = self._make_layer(resnet.block, self.out_channels[5], 2, stride=2)
         self.conv_bn_relu = nn.Sequential(
             nn.Conv2d(resnet.inplanes, resnet.inplanes, kernel_size=(1, 2), stride=1),
             nn.BatchNorm2d(resnet.inplanes),
@@ -321,7 +326,7 @@ class ExtendedResNet(nn.Module):
         features[0] = layer_1_2
 
         # append features from extra layers
-        x = features[-1]
+        x = features[-1] 
 
         x = self.extra1(x)
         features.append(x)
@@ -340,8 +345,8 @@ class ExtendedResNet(nn.Module):
         #         features.append(x)
         # average pool in case resolution is to high for 1x1 in last extra
         # features[-1] = self.resnet.avgpool(x)
-        #for f in features:
-        #    print(f.shape)
+        for f in features:
+            print(f.shape)
         return features
 
 

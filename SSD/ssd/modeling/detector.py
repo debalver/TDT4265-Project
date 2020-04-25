@@ -46,9 +46,13 @@ def build_backbone(cfg):
     if backbone_name == "resnet":
         model = resnet34(cfg.MODEL.BACKBONE.PRETRAINED)
         return model
+    if backbone_name == "resnet34":
+        resnet = resnet34(cfg.MODEL.BACKBONE.PRETRAINED)
+        model = ExtendedResNet(resnet, cfg)
+        return model
     if backbone_name == "resnet50":
         resnet = resnet50(cfg.MODEL.BACKBONE.PRETRAINED)
-        model = ExtendedResNet(resnet)
+        model = ExtendedResNet(resnet, cfg)
         return model
     if backbone_name == "resnet101":
         resnet = resnet101(cfg.MODEL.BACKBONE.PRETRAINED)
