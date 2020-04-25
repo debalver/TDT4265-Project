@@ -345,8 +345,8 @@ class ExtendedResNet(nn.Module):
         #         features.append(x)
         # average pool in case resolution is to high for 1x1 in last extra
         # features[-1] = self.resnet.avgpool(x)
-        for f in features:
-            print(f.shape)
+        #for f in features:
+        #    print(f.shape)
         return features
 
 
