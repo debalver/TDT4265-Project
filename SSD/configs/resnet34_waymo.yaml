@@ -29,6 +29,6 @@ SOLVER:
     BATCH_SIZE: 16
     LR: 1e-3
 EVAL_STEP: 1000
-MODEL_SAVE_STEP: 2000
-OUTPUT_DIR: 'outputs/resnet50_320x240_imp_priors'
+MODEL_SAVE_STEP: 1
+OUTPUT_DIR: 'work/quentind/outputs/resnet50_320x240_imp_priors'
 DATASET_DIR: "datasets"
