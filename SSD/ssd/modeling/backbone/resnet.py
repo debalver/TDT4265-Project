@@ -257,10 +257,10 @@ class FeatureFuse(nn.Module):
         super(FeatureFuse, self).__init__()
         self.conv_a = nn.Sequential(
             nn.Conv2d(a_inplanes, 256, kernel_size=(3, 3), stride=2, padding=1),
-            nn.Conv2d(256, b_inplanes/2, kernel_size=(1, 1), stride=1),
-            nn.BatchNorm2d(b_inplanes/2)
+            nn.Conv2d(256, b_inplanes//2, kernel_size=(1, 1), stride=1),
+            nn.BatchNorm2d(b_inplanes//2)
         )
-        self.bn_b = nn.BatchNorm2d(b_inplanes)
+        self.bn_b = nn.BatchNorm2d(b_inplanes//2)
         self.relu = nn.ReLU()
 
     def forward(self, a, b):
