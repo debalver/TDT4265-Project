@@ -257,8 +257,8 @@ class FeatureFuse(nn.Module):
         super(FeatureFuse, self).__init__()
         self.conv_a = nn.Sequential(
             nn.Conv2d(a_inplanes, 256, kernel_size=(3, 3), stride=2, padding=1),
-            nn.Conv2d(256, b_inplanes, kernel_size=(1, 1), stride=1),
-            nn.BatchNorm2d(b_inplanes)
+            nn.Conv2d(256, b_inplanes/2, kernel_size=(1, 1), stride=1),
+            nn.BatchNorm2d(b_inplanes/2)
         )
         self.bn_b = nn.BatchNorm2d(b_inplanes)
         self.relu = nn.ReLU()
@@ -266,7 +266,8 @@ class FeatureFuse(nn.Module):
     def forward(self, a, b):
         a = self.conv_a(a)
         b = self.bn_b(b)
-        x = a + b
+        # Concatenate along the channel/depth axis
+        x = torch.cat((a, b), 1)
         x = self.relu(x)
         return x
 
@@ -276,9 +277,7 @@ class ExtendedResNet(nn.Module):
         super(ExtendedResNet, self).__init__()
         self.resnet = resnet
         self.out_channels = cfg.MODEL.BACKBONE.OUT_CHANNELS
-        
-        # Modify the first maxpool layer by two conv2d
-        self.resnet.maxpool = conv3x3(64, 64, stride=2)
+
         self.feature_fuse = FeatureFuse(64, self.out_channels[0])
         #self.smooth = nn.Conv2d(resnet.inplanes, 1024, kernel_size=3, stride=1, padding=1)
         #self.extras = nn.ModuleList(add_extras(resnet.inplanes))

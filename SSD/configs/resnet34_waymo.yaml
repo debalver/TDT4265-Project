@@ -3,7 +3,7 @@ MODEL:
     BACKBONE:
         NAME: 'resnet34'
         PRETRAINED: True
-        OUT_CHANNELS: [128, 256, 512, 1024, 512, 256]
+        OUT_CHANNELS: [256, 256, 512, 1024, 512, 256]
         INPUT_CHANNELS: 3
     PRIORS:
         FEATURE_MAPS: [[30, 40], [15, 20], [8, 10], [4, 5], [2, 3], [1, 1]]
