@@ -23,25 +23,6 @@ model_urls = {
 }
 
 
-def add_extras(in_channel):
-    # Extra layers added to resnet for feature scaling, 
-    # borrowed from https://github.com/yqyao/SSD_Pytorch/blob/master/models/resnet.py
-    layers = []
-    layers += [nn.Conv2d(in_channel, 1024, kernel_size=3, stride=2)]
-    layers += [nn.Dropout(p=0.3)]
-    layers += [nn.Conv2d(1024, 1024, kernel_size=1)]                # to classifier
-    layers += [nn.BatchNorm2d(1024)]
-    layers += [nn.Conv2d(1024, 256, kernel_size=1)]
-    layers += [nn.Dropout(p=0.3)]
-    layers += [nn.Conv2d(256, 512, kernel_size=3, stride=2)]        # to classifier
-    layers += [nn.BatchNorm2d(512)]
-    layers += [nn.Conv2d(512, 128, kernel_size=1)]
-    layers += [nn.Dropout(p=0.3)]
-    layers += [nn.Conv2d(128, 256, kernel_size=(2, 3), stride=1)]    # to classifier
-
-    return layers
-
-
 def conv3x3(in_planes, out_planes, stride=1, groups=1, dilation=1):
     """3x3 convolution with padding"""
     return nn.Conv2d(in_planes, out_planes, kernel_size=3, stride=stride,
@@ -116,6 +97,7 @@ class Bottleneck(nn.Module):
         self.conv3 = conv1x1(width, planes * self.expansion)
         self.bn3 = norm_layer(planes * self.expansion)
         self.relu = nn.ReLU(inplace=True)
+        self.dropout = nn.Dropout(p=0.05)
         self.downsample = downsample
         self.stride = stride
 
@@ -124,10 +106,12 @@ class Bottleneck(nn.Module):
 
         out = self.conv1(x)
         out = self.bn1(out)
+        out = self.dropout(out)
         out = self.relu(out)
 
         out = self.conv2(out)
         out = self.bn2(out)
+        out = self.dropout(out)
         out = self.relu(out)
 
         out = self.conv3(out)
@@ -238,14 +222,6 @@ class ResNet(nn.Module):
         x = self.layer4(x)  # stride 64
         features.append(x)
         
-        # x = self.avgpool(x)
-        # x = torch.flatten(x, 1)
-        # x = self.fc(x)
-
-        # print shape of outputs
-        # for feature in features:
-        #    print(feature.shape[1:])
-
         return features
 
     def forward(self, x):
@@ -275,18 +251,31 @@ class ExtendedResNet(nn.Module):
     def __init__(self, resnet):
         super(ExtendedResNet, self).__init__()
         self.resnet = resnet
+        self.first_foreward_pass = True
         self.feature_fuse = FeatureFuse(256, 512)
         self.smooth = nn.Conv2d(resnet.inplanes, 1024, kernel_size=3, stride=1, padding=1)
-        self.extras = nn.ModuleList(add_extras(resnet.inplanes))
         resnet.block.expansion = 1
-        self.extra1 = self._make_layer(resnet.block, 1024, 2, stride=2)
-        self.extra2 = self._make_layer(resnet.block, 512, 2, stride=2)
-        self.extra3 = self._make_layer(resnet.block, 256, 2, stride=2)
-        self.conv_bn_relu = nn.Sequential(
-            nn.Conv2d(resnet.inplanes, resnet.inplanes, kernel_size=(1, 2), stride=1),
+        self.additional_blocks = []
+        for output_size in [512, 256]:
+            layer = self._make_layer(resnet.block, output_size, 2, stride=2)
+            self.additional_blocks.append(layer)
+        layer = nn.Sequential(
+            nn.Conv2d(resnet.inplanes, 128, kernel_size=1, bias=False),
+            nn.BatchNorm2d(128),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(128, 256, kernel_size=(2, 3), stride=1, bias=False),
             nn.BatchNorm2d(resnet.inplanes),
-            nn.ReLU()
+            nn.ReLU(inplace=True)
         )
+        self.additional_blocks.append(layer)
+        self.additional_blocks = nn.ModuleList(self.additional_blocks)
+        self._init_weights()
+
+    def _init_weights(self):
+        layers = [*self.additional_blocks]
+        for layer in layers:
+            for param in layer.parameters():
+                if param.dim() > 1: nn.init.xavier_uniform_(param)
     
     def _make_layer(self, block, planes, blocks, stride=1, dilate=False):
         norm_layer = self.resnet._norm_layer
@@ -312,36 +301,31 @@ class ExtendedResNet(nn.Module):
 
         return nn.Sequential(*layers)
 
+    def _init_weights(self):
+        layers = [*self.additional_blocks]
+        for layer in layers:
+            for param in layer.parameters():
+                if param.dim() > 1: nn.init.xavier_uniform_(param)
+
     def forward(self, x):
-        features = self.resnet(x)
+        resnet_features = self.resnet(x)
 
         # feature fusion between layer1 and layer2
-        layer_1_2 = self.feature_fuse(features[0], features[1])
-        features = features[1:]
-        features[0] = layer_1_2
+        layer_1_2 = self.feature_fuse(resnet_features[0], resnet_features[1])
+        features = [layer_1_2, *resnet_features[2:]]
 
         # append features from extra layers
         x = features[-1]
 
-        x = self.extra1(x)
-        features.append(x)
-        x = self.extra2(x)
-        features.append(x)
-        x = self.extra3(x)
-        x = self.conv_bn_relu(x)
-        features.append(x)
+        for l in self.additional_blocks:
+            x = l(x)
+            features.append(x)
 
-        # features[-1] = self.smooth(x)
-        # for k, v in enumerate(self.extras):
-        #     x = v(x)
-        #     if k % 2 == 0:
-        #         x = F.relu(x, inplace=True)
-        #     if k % 4 == 2:
-        #         features.append(x)
-        # average pool in case resolution is to high for 1x1 in last extra
-        # features[-1] = self.resnet.avgpool(x)
-        #for f in features:
-        #    print(f.shape)
+        if (self.first_foreward_pass):
+            self.first_foreward_pass = False
+            print("Backbone eature output shapes:")
+            for f in features:
+                print(f.shape)
         return features
 
 

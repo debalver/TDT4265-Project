@@ -28,5 +28,5 @@ SOLVER:
     LR: 1e-3
 EVAL_STEP: 1000
 MODEL_SAVE_STEP: 2000
-OUTPUT_DIR: 'outputs/resnet101_320x240'
+OUTPUT_DIR: 'outputs/resnet101_320x240_new'
 DATASET_DIR: "datasets"

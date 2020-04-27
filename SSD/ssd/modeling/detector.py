@@ -4,7 +4,9 @@ from ssd.modeling.backbone.basic import BasicModel
 from ssd.modeling.box_head.box_head import SSDBoxHead
 from ssd.utils.model_zoo import load_state_dict_from_url
 from ssd import torch_utils
-from ssd. modeling.backbone.resnet import resnet101, resnet152, resnet18, resnet34, resnet50, ExtendedResNet
+from ssd.modeling.backbone.resnet import resnet101, resnet152, resnet18, resnet34, resnet50, ExtendedResNet
+from ssd.modeling.backbone.resnet_simplefied import resnet34_simplefied, resnet50_simplefied, resnet101_simplefied
+from ssd.modeling.backbone.inception_v3 import inception_v3_backbone
 
 class SSDDetector(nn.Module):
     def __init__(self, cfg):
@@ -43,8 +45,9 @@ def build_backbone(cfg):
                 "https://s3.amazonaws.com/amdegroot-models/vgg16_reducedfc.pth")
             model.init_from_pretrain(state_dict)
         return model
-    if backbone_name == "resnet":
-        model = resnet34(cfg.MODEL.BACKBONE.PRETRAINED)
+    if backbone_name == "resnet34":
+        resnet = resnet34(cfg.MODEL.BACKBONE.PRETRAINED)
+        model = ExtendedResNet(resnet)
         return model
     if backbone_name == "resnet50":
         resnet = resnet50(cfg.MODEL.BACKBONE.PRETRAINED)
@@ -58,4 +61,18 @@ def build_backbone(cfg):
         resnet = resnet152(cfg.MODEL.BACKBONE.PRETRAINED)
         model = ExtendedResNet(resnet)
         return model
+    if backbone_name == "inception_v3":
+        model = inception_v3_backbone(cfg.MODEL.BACKBONE.PRETRAINED)
+        return model
+    if backbone_name == "resnet34_simplefied":
+        model = resnet34_simplefied(cfg.MODEL.BACKBONE.PRETRAINED)
+        return model
+    if backbone_name == "resnet50_simplefied":
+        model = resnet50_simplefied(cfg.MODEL.BACKBONE.PRETRAINED)
+        return model
+    if backbone_name == "resnet101_simplefied":
+        model = resnet101_simplefied(cfg.MODEL.BACKBONE.PRETRAINED)
+        return model
+
+        
     

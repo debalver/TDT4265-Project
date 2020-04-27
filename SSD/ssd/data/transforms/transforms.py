@@ -81,7 +81,7 @@ class Compose(object):
 class RandomAddSnow(object):
     def __init__(self):
         self.tra = iaa.Sometimes(
-                        0.4,
+                        0.1,
                         iaa.Sequential([
                             iaa.GammaContrast((0.5, 2.0)),
                             iaa.Snowflakes(flake_size=(0.2, 0.7), speed=(0.007, 0.03)),
@@ -96,7 +96,7 @@ class RandomAddSnow(object):
 class RandomAddFog(object):
     def __init__(self):
         self.tra = iaa.Sometimes(
-                        0.4,
+                        0.1,
                         iaa.Sequential([
                             iaa.GammaContrast((0.5, 2.0)),
                             iaa.imgcorruptlike.Fog(severity=1),
