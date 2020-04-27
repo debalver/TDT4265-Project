@@ -35,6 +35,8 @@ class MultiBoxLoss(nn.Module):
         pos_mask = labels > 0
         predicted_locations = predicted_locations[pos_mask, :].view(-1, 4)
         gt_locations = gt_locations[pos_mask, :].view(-1, 4)
-        smooth_l1_loss = F.smooth_l1_loss(predicted_locations, gt_locations, reduction='sum')
+        # smooth_l1_loss = F.smooth_l1_loss(predicted_locations, gt_locations, reduction='sum')
+        mse_loss = F.mse_loss(predicted_locations, gt_locations, reduction='sum')
         num_pos = gt_locations.size(0)
-        return smooth_l1_loss / num_pos, classification_loss / num_pos
+        #return smooth_l1_loss / num_pos, classification_loss / num_pos
+        return mse_loss / num_pos, classification_loss / num_pos

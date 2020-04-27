@@ -2,8 +2,12 @@
 import torch
 import cv2
 import numpy as np
+import time
 from numpy import random
+import imgaug as ia
+import imgaug.augmenters as iaa
 
+ia.seed(int( time.time() * 1000.0 ))
 
 def intersect(box_a, box_b):
     max_xy = np.minimum(box_a[:, 2:], box_b[2:])
@@ -74,18 +78,49 @@ class Compose(object):
         return img, boxes, labels
 
 
+class RandomAddSnow(object):
+    def __init__(self):
+        self.tra = iaa.Sometimes(
+                        0.1,
+                        iaa.Sequential([
+                            iaa.GammaContrast((0.5, 2.0)),
+                            iaa.Snowflakes(flake_size=(0.2, 0.7), speed=(0.007, 0.03)),
+                        ])
+                    )
+       
+    def __call__(self, image, boxes=None, labels=None):
+        #ia.seed(int( time.time() * 1000.0 ))
+        return self.tra(images = [image])[0], boxes, labels
+
+
+class RandomAddFog(object):
+    def __init__(self):
+        self.tra = iaa.Sometimes(
+                        0.1,
+                        iaa.Sequential([
+                            iaa.GammaContrast((0.5, 2.0)),
+                            iaa.imgcorruptlike.Fog(severity=1),
+                        ])
+                    )
+       
+    def __call__(self, image, boxes=None, labels=None):
+        #ia.seed(int( time.time() * 1000.0 ))
+        return self.tra(images = [image])[0], boxes, labels
+
+
 class ConvertFromInts(object):
     def __call__(self, image, boxes=None, labels=None):
         return image.astype(np.float32), boxes, labels
 
 
-class SubtractMeans(object):
-    def __init__(self, mean):
+class Normalize(object):
+    def __init__(self, mean, std):
         self.mean = np.array(mean, dtype=np.float32)
+        self.std = np.array(std, dtype=np.float32)
 
     def __call__(self, image, boxes=None, labels=None):
         image = image.astype(np.float32)
-        image -= self.mean
+        image = (image - self.mean) / self.std
         return image.astype(np.float32), boxes, labels
 
 
@@ -112,12 +147,11 @@ class ToPercentCoords(object):
 
 
 class Resize(object):
-    def __init__(self, size=300):
+    def __init__(self, size=(300, 300)):
         self.size = size
 
     def __call__(self, image, boxes=None, labels=None):
-        image = cv2.resize(image, (self.size,
-                                   self.size))
+        image = cv2.resize(image, self.size)
         return image, boxes, labels
 
 

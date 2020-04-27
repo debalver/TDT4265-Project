@@ -1,0 +1,32 @@
+MODEL:
+    NUM_CLASSES: 5
+    BACKBONE:
+        NAME: 'resnet101'
+        PRETRAINED: True
+        OUT_CHANNELS: [512, 1024, 2048, 1024, 512, 256]
+        INPUT_CHANNELS: 3
+    PRIORS:
+        FEATURE_MAPS: [[30, 40], [15, 20], [8, 10], [4, 5], [2, 3], [1, 1]]
+        STRIDES: [[8,8], [16, 16], [30, 32], [60, 64], [120, 106], [240, 320]]
+        MIN_SIZES: [[32, 24], [64, 48], [118, 89], [173, 130], [227, 170], [282, 211]]
+        MAX_SIZES: [[64, 48], [118, 89], [173, 130], [227, 170], [282, 211], [336, 252]] # [WIDTH, HEIGHT]
+INPUT:
+    IMAGE_WIDTH: 320
+    IMAGE_HEIGHT: 240
+    PIXEL_MEAN: [92, 101, 114]
+    PIXEL_STD: [56,  62, 73]
+DATASETS:
+    TRAIN: ("tdt4265_train",)
+    TEST: ("tdt4265_val", )
+DATA_LOADER:
+  NUM_WORKERS: 8
+SOLVER:
+    MAX_ITER: 320000
+    LR_STEPS: [120000, 140000]
+    GAMMA: 0.1
+    BATCH_SIZE: 16
+    LR: 1e-3
+EVAL_STEP: 1000
+MODEL_SAVE_STEP: 2000
+OUTPUT_DIR: outputs/resnet101_320x240_tdt4265
+DATASET_DIR: "datasets"

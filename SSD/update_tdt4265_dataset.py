@@ -6,7 +6,7 @@ import zipfile
 import tqdm
 
 
-zip_url = ""
+zip_url = "https://drive.google.com/file/d/1gjNk2vubi7-4Tq8bZS95lffYhvoitpT9/view?usp=sharing"
 dataset_path = pathlib.Path("datasets", "tdt4265")
 
 

@@ -82,7 +82,7 @@ class L2Norm(nn.Module):
 class VGG(nn.Module):
     def __init__(self, cfg):
         super().__init__()
-        size = cfg.INPUT.IMAGE_SIZE
+        size = cfg.INPUT.IMAGE_WIDTH
         vgg_config = vgg_base[str(size)]
         extras_config = extras_base[str(size)]
 

@@ -27,6 +27,7 @@ def do_train(cfg, model,
              arguments):
     logger = logging.getLogger("SSD.trainer")
     logger.info("Start training ...")
+    torch.cuda.empty_cache()
     meters = MetricLogger()
 
     model.train()

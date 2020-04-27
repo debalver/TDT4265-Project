@@ -57,6 +57,7 @@ def get_parser():
 
 
 def main():
+    torch.cuda.empty_cache()
     args = get_parser().parse_args()
     cfg.merge_from_file(args.config_file)
     cfg.merge_from_list(args.opts)
