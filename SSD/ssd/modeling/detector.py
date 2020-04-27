@@ -4,7 +4,7 @@ from ssd.modeling.backbone.basic import BasicModel
 from ssd.modeling.box_head.box_head import SSDBoxHead
 from ssd.utils.model_zoo import load_state_dict_from_url
 from ssd import torch_utils
-from ssd.modeling.backbone.resnet import resnet101, resnet152, resnet18, resnet34, resnet50, ExtendedResNet
+from ssd.modeling.backbone.resnet import resnet101, resnet152, resnet18, resnet34, resnet50, ExtendedResNet, wide_resnet50_2, wide_resnet101_2
 from ssd.modeling.backbone.resnet_simplefied import resnet34_simplefied, resnet50_simplefied, resnet101_simplefied
 from ssd.modeling.backbone.inception_v3 import inception_v3_backbone
 
@@ -49,9 +49,13 @@ def build_backbone(cfg):
         resnet = resnet34(cfg.MODEL.BACKBONE.PRETRAINED)
         model = ExtendedResNet(resnet)
         return model
+    if backbone_name == "resnet34":
+        resnet = resnet34(cfg.MODEL.BACKBONE.PRETRAINED)
+        model = ExtendedResNet(resnet, cfg)
+        return model
     if backbone_name == "resnet50":
         resnet = resnet50(cfg.MODEL.BACKBONE.PRETRAINED)
-        model = ExtendedResNet(resnet)
+        model = ExtendedResNet(resnet, cfg)
         return model
     if backbone_name == "resnet101":
         resnet = resnet101(cfg.MODEL.BACKBONE.PRETRAINED)
@@ -59,6 +63,14 @@ def build_backbone(cfg):
         return model
     if backbone_name == "resnet152":
         resnet = resnet152(cfg.MODEL.BACKBONE.PRETRAINED)
+        model = ExtendedResNet(resnet)
+        return model
+    if backbone_name == "wide_resnet50":
+        resnet = wide_resnet50_2(cfg.MODEL.BACKBONE.PRETRAINED)
+        model = ExtendedResNet(resnet)
+        return model
+    if backbone_name == "wide_resnet101":
+        resnet = wide_resnet50_2(cfg.MODEL.BACKBONE.PRETRAINED)
         model = ExtendedResNet(resnet)
         return model
     if backbone_name == "inception_v3":

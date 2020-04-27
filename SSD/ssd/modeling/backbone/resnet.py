@@ -233,22 +233,23 @@ class FeatureFuse(nn.Module):
         super(FeatureFuse, self).__init__()
         self.conv_a = nn.Sequential(
             nn.Conv2d(a_inplanes, 256, kernel_size=(3, 3), stride=2, padding=1),
-            nn.Conv2d(256, 512, kernel_size=(1, 1), stride=1),
-            nn.BatchNorm2d(512)
+            nn.Conv2d(256, b_inplanes//2, kernel_size=(1, 1), stride=1),
+            nn.BatchNorm2d(b_inplanes//2)
         )
-        self.bn_b = nn.BatchNorm2d(b_inplanes)
+        self.bn_b = nn.BatchNorm2d(b_inplanes//2)
         self.relu = nn.ReLU()
 
     def forward(self, a, b):
         a = self.conv_a(a)
         b = self.bn_b(b)
-        x = a + b
+        # Concatenate along the channel/depth axis
+        x = torch.cat((a, b), 1)
         x = self.relu(x)
         return x
 
 
 class ExtendedResNet(nn.Module):
-    def __init__(self, resnet):
+    def __init__(self, resnet, cfg):
         super(ExtendedResNet, self).__init__()
         self.resnet = resnet
         self.first_foreward_pass = True
@@ -315,7 +316,7 @@ class ExtendedResNet(nn.Module):
         features = [layer_1_2, *resnet_features[2:]]
 
         # append features from extra layers
-        x = features[-1]
+        x = features[-1] 
 
         for l in self.additional_blocks:
             x = l(x)
