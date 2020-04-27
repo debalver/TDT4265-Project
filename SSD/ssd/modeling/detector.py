@@ -8,6 +8,7 @@ from ssd.modeling.backbone.resnet import resnet101, resnet152, resnet18, resnet3
 from ssd.modeling.backbone.resnet_simplefied import resnet34_simplefied, resnet50_simplefied, resnet101_simplefied
 from ssd.modeling.backbone.inception_v3 import inception_v3_backbone
 from ssd.modeling.backbone.inception_resnet import Inception_ResNetv2
+from ssd.modeling.backbone.mobilenet import mobilenet_v2
 
 class SSDDetector(nn.Module):
     def __init__(self, cfg):
@@ -89,3 +90,9 @@ def build_backbone(cfg):
     if backbone_name == "inception_resnet":
         model = Inception_ResNetv2()
         return model
+    if backbone_name == "MobileNetV2":
+        model = mobilenet_v2(cfg.MODEL.BACKBONE.PRETRAINED, cfg.MODEL.NUM_CLASSES)
+        return model
+
+        
+    
