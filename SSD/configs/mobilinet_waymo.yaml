@@ -1,0 +1,28 @@
+MODEL:
+    NUM_CLASSES: 5
+    BACKBONE:
+        NAME: 'MobileNetV2'
+        PRETRAINED: True
+        OUT_CHANNELS: [32, 32, 64, 64, 64, 96, 160, 320]
+        INPUT_CHANNELS: 3
+    PRIORS:
+        FEATURE_MAPS: [38, 38, 19, 19, 19, 19, 10, 10]
+        STRIDES: [8, 8, 16, 16, 16, 16, 30, 30]
+        MIN_SIZES: [30, 60, 111, 162, 213, 264, 315, 366]
+        MAX_SIZES: [60, 111, 162, 213, 264, 315, 366, 417]
+        ASPECT_RATIOS: [[2], [2,3], [2,3], [2,3], [2], [2], [2], [2]]
+        BOXES_PER_LOCATION: [4, 6, 6, 6, 4, 4, 4, 4]
+INPUT:
+    IMAGE_SIZE: 300
+DATASETS:
+    TRAIN: ("waymo_train",)
+    TEST: ("waymo_val", )
+SOLVER:
+    MAX_ITER: 50000
+    LR_STEPS: [80000, 100000]
+    GAMMA: 0.1
+    BATCH_SIZE: 16
+    LR: 1e-3
+OUTPUT_DIR: 'outputs/mobilenet/8outputs'
+DATASET_DIR: "datasets"
+EVAL_STEP: 5000

@@ -85,6 +85,9 @@ def build_backbone(cfg):
     if backbone_name == "resnet101_simplefied":
         model = resnet101_simplefied(cfg.MODEL.BACKBONE.PRETRAINED)
         return model
+    if backbone_name == "MobileNetV2":
+        model = mobilenet_v2(cfg.MODEL.BACKBONE.PRETRAINED, cfg.MODEL.NUM_CLASSES)
+        return model
 
         
     
