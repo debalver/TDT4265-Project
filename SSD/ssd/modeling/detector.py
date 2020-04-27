@@ -7,6 +7,7 @@ from ssd import torch_utils
 from ssd.modeling.backbone.resnet import resnet101, resnet152, resnet18, resnet34, resnet50, ExtendedResNet, wide_resnet50_2, wide_resnet101_2
 from ssd.modeling.backbone.resnet_simplefied import resnet34_simplefied, resnet50_simplefied, resnet101_simplefied
 from ssd.modeling.backbone.inception_v3 import inception_v3_backbone
+from ssd.modeling.backbone.inception_resnet import Inception_ResNetv2
 
 class SSDDetector(nn.Module):
     def __init__(self, cfg):
@@ -85,6 +86,6 @@ def build_backbone(cfg):
     if backbone_name == "resnet101_simplefied":
         model = resnet101_simplefied(cfg.MODEL.BACKBONE.PRETRAINED)
         return model
-
-        
-    
+    if backbone_name == "inception_resnet":
+        model = Inception_ResNetv2()
+        return model
